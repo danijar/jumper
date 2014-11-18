@@ -2,3 +2,7 @@
 /Include
 /Lib
 /Scripts
+
+# Python pre compiled binaries
+__pycache__/
+*.py[cod]
