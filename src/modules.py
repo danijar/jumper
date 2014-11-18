@@ -22,6 +22,25 @@ class Window(object):
 				elif event.key == pygame.K_c and event.mod & pygame.KMOD_LCTRL:
 					self.system.running = False
 
+class Player(object):
+	def __init__(self, system):
+		self.system = system
+	def update(self):
+		keys = pygame.key.get_pressed()
+		for entity in self.system.entities.players:
+			player = self.system.entities.players[entity]
+			if entity in self.system.entities.movements:
+				direction = [0, 0]
+				if keys[player.controls['right']]:
+					direction[0] += 1
+				if keys[player.controls['left']]:
+					direction[0] -= 1
+				if keys[player.controls['down']]:
+					direction[1] += 1
+				if keys[player.controls['up']]:
+					direction[1] -= 1
+				self.system.entities.movements[entity].direction = direction
+
 class Movement(object):
 	def __init__(self, system):
 		self.system = system
@@ -39,6 +58,19 @@ class Movement(object):
 					movement.direction[0] *= -1
 				if body.top < 0 or body.bottom > self.system.height:
 					movement.direction[1] *= -1
+				# Keep inside window area
+				if body.top < 0:
+					body.top = 0
+					body.float_y = body.y
+				if body.bottom > self.system.height:
+					body.bottom = self.system.height
+					body.float_y = body.y
+				if body.left < 0:
+					body.left = 0
+					body.float_x = body.x
+				if body.right > self.system.width:
+					body.right = self.system.width
+					body.float_x = body.x
 				# Store result
 				self.system.entities.movements[entity] = movement
 				self.system.entities.bodies[entity] = body
