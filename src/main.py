@@ -14,6 +14,18 @@ class Movement(object):
 		self.direction = direction
 		self.speed = speed
 
+# Body property
+class Body(pygame.Rect):
+	def __init__(self, rect):
+		super().__init__(rect.left, rect.top, rect.width, rect.height)
+		self.float_x = float(self.x)
+		self.float_y = float(self.y)
+	def move(self, way):
+		self.float_x += way[0]
+		self.float_y += way[1]
+		self.x = int(self.float_x)
+		self.y = int(self.float_y)
+
 # Property collections
 class Entities(object):
 	def __init__(self):
@@ -33,13 +45,19 @@ entities = Entities()
 def create_ball():
 	entity = entities.create()
 	entities.sprites[entity] = pygame.image.load("asset/texture/circle.png")
-	entities.bodies[entity] = entities.sprites[entity].get_rect()
+	entities.bodies[entity] = Body(entities.sprites[entity].get_rect())
 	entities.movements[entity] = Movement([1, 1])
 	return entity
 
-for i in range(10):
+for i in range(32):
 	entity = create_ball()
-	entities.movements[entity].speed = (i + 1)
+	sprite = entities.sprites[entity]
+	length = int(20 + (80 * random.random()))
+	sprite = pygame.transform.scale(sprite, [length, length])
+	entities.bodies[entity] = Body(sprite.get_rect())
+	entities.sprites[entity] = sprite
+	speed = 1.0 + (9.0 * random.random())
+	entities.movements[entity].speed = speed
 
 # Main loop
 running = True
@@ -68,7 +86,7 @@ while running:
 		if body:
 			# Move in current direction with current speed
 			way = [x * movement.speed for x in movement.direction]
-			body = body.move(way)
+			body.move(way)
 			# Bounce from window borders
 			if body.left < 0 or body.right > width:
 				movement.direction[0] *= -1
