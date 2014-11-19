@@ -1,5 +1,6 @@
 import uuid
 
+
 class Entities(object):
 	def __init__(self):
 		self.sprites = {}
