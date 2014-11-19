@@ -47,20 +47,49 @@ class Body(object):
 	def __init__(self, system):
 		self.system = system
 	def update(self):
-		# Update move properties
-		for entity in self.system.entities.bodies:
-			body = self.system.entities.bodies[entity]
-			# Move body
-			# Velocity is in meters per second so convert to pixels per frame
-			delta = 1 / 60
+		delta = 1 / 60
+		self.update_movement(delta)
+		self.update_collision()
+		self.update_velocity(delta)
+		self.ensure_inside_window()
+	def update_movement(self, delta):
+		"""Move all bodies according to their velocity"""
+		for body in self.system.entities.bodies.values():
+			# Move body by velocity given in meters per second
 			pixel_per_meter = 32
 			body.move(body.velocity * delta * pixel_per_meter)
-			# Bounce from window borders
+	def update_collision(self):
+		"""Compute collisions between bodies"""
+		for one, two in self.get_intersecting():
+			# Create vectors to move objects out of intersection
+			overlap = one.clip(two)
+			point = vec(overlap.centerx, overlap.centery)
+			away_one = (vec(one.centerx, one.centery) - point).normalize()
+			away_two = (vec(two.centerx, two.centery) - point).normalize()
+			# Scale by size of overlapping area
+			away_one.x *= overlap.w / 2
+			away_one.y *= overlap.h / 2
+			away_two.x *= overlap.w / 2
+			away_two.y *= overlap.h / 2
+			# Scale by objects current velocity ratio
+			velocity_sum = one.velocity.length() + two.velocity.length()
+			away_one *= one.velocity.length() / max(velocity_sum, .001)
+			away_two *= two.velocity.length() / max(velocity_sum, .001)
+			# Move bodies away from each other
+			one.move(away_one)
+			two.move(away_two)
+			# Swap velocities as a simplification to impulse calculation
+			one.velocity, two.velocity = two.velocity, one.velocity
+	def update_velocity(self, delta):
+		"""Update velocity for the next frame"""
+		for body in self.system.entities.bodies.values():
+			# Bounce from window border
 			if body.left < 0 or body.right > self.system.width:
 				body.velocity.x *= -body.bounce.x
 			if body.top < 0 or body.bottom > self.system.height:
 				body.velocity.y *= -body.bounce.y
-			# Apply gravity while in the air
+			# Apply gravity while in the air, on the
+			# ground prevent from trying to move further
 			gravity = 15.0
 			if body.bottom < self.system.height:
 				body.velocity.y += gravity * delta
@@ -73,7 +102,9 @@ class Body(object):
 			if body.bottom >= self.system.height:
 				body.velocity.x *= max(1 - body.friction.x, 0)
 				body.velocity.y *= max(1 - body.friction.y, 0)
-			# Keep inside window area
+	def ensure_inside_window(self):
+		"""Keep bodies inside window area"""
+		for body in self.system.entities.bodies.values():
 			if body.top < 0:
 				body.top = 0
 				body.reinitialize_y()
@@ -86,6 +117,15 @@ class Body(object):
 			elif body.right > self.system.width:
 				body.right = self.system.width
 				body.reinitialize_x()
+	def get_intersecting(self):
+		"""Get all pairs of intersection bodies"""
+		pairs = []
+		bodies = list(self.system.entities.bodies.values())
+		for i, one in enumerate(bodies):
+			for j, two in enumerate(bodies[i + 1:]):
+				if one.colliderect(two):
+					pairs.append((one, two))
+		return pairs
 
 class Text(object):
 	def __init__(self, system):

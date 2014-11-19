@@ -5,15 +5,15 @@ from vec import vec
 
 
 def initialize(system):
-	def create_ball():
+	def create_box():
 		entity = system.entities.create()
 		system.entities.sprites[entity] = pygame.image.load("asset/texture/circle.png")
 		system.entities.bodies[entity] = Body(system.entities.sprites[entity].get_rect())
 		return entity
 
-	def create_balls(amount=32):
+	def create_boxes(amount=32):
 		for i in range(amount):
-			entity = create_ball()
+			entity = create_box()
 			# Sprite
 			sprite = system.entities.sprites[entity]
 			length = int(30 + (20 * random.random()))
@@ -21,7 +21,7 @@ def initialize(system):
 			system.entities.sprites[entity] = sprite		
 			# Add body, center position and push them around
 			body = Body(sprite.get_rect())
-			body.bottom = system.height
+			body.bottom = system.height - 50
 			body.centerx = int(system.width / 2)
 			body.real = vec(body.x, body.y)
 			body.velocity.x = 40 * (random.random() - .5)
@@ -48,5 +48,5 @@ def initialize(system):
 		if right: controls['right'] = right
 		if jump: controls['jump'] = jump
 
-	create_balls(15)
+	create_boxes(5)
 	create_player()

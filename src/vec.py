@@ -17,6 +17,10 @@ class vec(object):
 			return [int(self.x), int(self.y)]
 		else:
 			return [self.x, self.y]
+	def length(self):
+		return math.sqrt(self * self)
+	def normalize(self):
+		return self / self.length()
 	def __neg__(self):
 		return vec(-self.x, -self.y)
 	def __pos__(self):
@@ -41,7 +45,10 @@ class vec(object):
 			raise TypeError()
 	def __truediv__(self, other):
 		if isinstance(other, (int, float)):
-			return vec(self.x / other, self.y / other)
+			try:
+				return vec(self.x / other, self.y / other)
+			except ZeroDivisionError:
+				return self
 		else:
 			raise TypeError()
 	def __iadd__(self, other):
@@ -74,7 +81,5 @@ class vec(object):
 		return self.x or self.y
 	def __abs__(self):
 		return vec(abs(self.x), abs(self.y))
-	def __len__(self):
-		return math.sqrt(self * self)
 	def __str__(self):
 		return '(' + str(self.x) + ', ' + str(self.y) + ')'
