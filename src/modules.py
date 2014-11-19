@@ -41,7 +41,7 @@ class Player(object):
 				if keys[player.controls['jump']]:
 					# Only jump if on the ground
 					if body.bottom == self.system.height:	
-						body.velocity.y = -5.0 * player.speed
+						body.velocity.y = -2.5 * player.speed
 
 class Body(object):
 	def __init__(self, system):
@@ -50,28 +50,40 @@ class Body(object):
 		# Update move properties
 		for entity in self.system.entities.bodies:
 			body = self.system.entities.bodies[entity]
-			# Move body and apply gravity
-			gravity = 9.81
-			body.move(body.velocity + vec(0, gravity))
+			# Move body
+			# Velocity is in meters per second so convert to pixels per frame
+			delta = 1 / 60
+			pixel_per_meter = 32
+			body.move(body.velocity * delta * pixel_per_meter)
 			# Bounce from window borders
 			if body.left < 0 or body.right > self.system.width:
-				body.velocity.x *= -0.3
+				body.velocity.x *= -body.bounce.x
 			if body.top < 0 or body.bottom > self.system.height:
-				body.velocity.y *= -0.3
-			# Dump velocity to simulate frictions
+				body.velocity.y *= -body.bounce.y
+			# Apply gravity while in the air
+			gravity = 15.0
+			if body.bottom < self.system.height:
+				body.velocity.y += gravity * delta
+			else:
+				body.velocity.y = min(body.velocity.y, 0)
+			# Dump velocity to simulate air drag
 			body.velocity.x *= max(1 - body.dumping.x, 0)
 			body.velocity.y *= max(1 - body.dumping.y, 0)
+			# Simulate friction when on the ground
+			if body.bottom >= self.system.height:
+				body.velocity.x *= max(1 - body.friction.x, 0)
+				body.velocity.y *= max(1 - body.friction.y, 0)
 			# Keep inside window area
 			if body.top < 0:
 				body.top = 0
 				body.reinitialize_y()
-			if body.bottom > self.system.height:
+			elif body.bottom > self.system.height:
 				body.bottom = self.system.height
 				body.reinitialize_y()
 			if body.left < 0:
 				body.left = 0
 				body.reinitialize_x()
-			if body.right > self.system.width:
+			elif body.right > self.system.width:
 				body.right = self.system.width
 				body.reinitialize_x()
 

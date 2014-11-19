@@ -24,8 +24,8 @@ def initialize(system):
 			body.bottom = system.height
 			body.centerx = int(system.width / 2)
 			body.real = vec(body.x, body.y)
-			body.velocity.x = 20 * (random.random() - .5)
-			body.velocity.y = -(10 + 10 * random.random())
+			body.velocity.x = 40 * (random.random() - .5)
+			body.velocity.y = -(20 + 20 * random.random())
 			system.entities.bodies[entity] = body
 
 	def create_player(up=None, left=None, down=None, right=None, jump=None):
@@ -34,10 +34,11 @@ def initialize(system):
 		system.entities.players[entity] = Player()
 		# Add body and place at bottom center of window
 		body = Body(system.entities.sprites[entity].get_rect())
-		body.dumping.x = 0.5
+		body.friction.x = 3.0 # 0.05
 		body.bottom = system.height
 		body.centerx = int(system.width / 2)
 		body.real = vec(body.x, body.y)
+		body.bounce.y = 0
 		system.entities.bodies[entity] = body
 		# Override provided controls
 		controls = system.entities.players[entity].controls
@@ -47,5 +48,5 @@ def initialize(system):
 		if right: controls['right'] = right
 		if jump: controls['jump'] = jump
 
-	create_balls(5)
+	create_balls(15)
 	create_player()
