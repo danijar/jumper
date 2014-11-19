@@ -105,6 +105,7 @@ class Sprite(object):
 		# Render sprites
 		screen = pygame.display.get_surface()
 		screen.fill((0, 0, 0))
+		text_offset = 0
 		for entity in self.system.entities.sprites:
 			sprite = self.system.entities.sprites.get(entity)
 			body = self.system.entities.bodies.get(entity)
@@ -112,4 +113,7 @@ class Sprite(object):
 			if body:
 				screen.blit(sprite, body)
 			elif text:
-				screen.blit(sprite, sprite.get_rect())
+				rect = sprite.get_rect()
+				rect.top = text_offset
+				text_offset = rect.bottom
+				screen.blit(sprite, rect)
