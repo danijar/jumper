@@ -1,6 +1,7 @@
 import random
 import pygame
 from properties import Body, Player
+from vec import vec
 
 
 def initialize(system):
@@ -22,10 +23,9 @@ def initialize(system):
 			body = Body(sprite.get_rect())
 			body.bottom = system.height
 			body.centerx = int(system.width / 2)
-			body.real[0] = body.x
-			body.real[1] = body.y
-			body.velocity[0] = 20 * (random.random() - .5)
-			body.velocity[1] = -(10 + 10 * random.random())
+			body.real = vec(body.x, body.y)
+			body.velocity.x = 20 * (random.random() - .5)
+			body.velocity.y = -(10 + 10 * random.random())
 			system.entities.bodies[entity] = body
 
 	def create_player(up=None, left=None, down=None, right=None, jump=None):
@@ -36,8 +36,7 @@ def initialize(system):
 		body = Body(system.entities.sprites[entity].get_rect())
 		body.bottom = system.height
 		body.centerx = int(system.width / 2)
-		body.real[0] = body.x
-		body.real[1] = body.y
+		body.real = vec(body.x, body.y)
 		system.entities.bodies[entity] = body
 		# Override provided controls
 		controls = system.entities.players[entity].controls

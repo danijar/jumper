@@ -1,5 +1,6 @@
 import pygame
 from system import System
+from vec import vec
 
 
 class Window(object):
@@ -32,13 +33,13 @@ class Player(object):
 			if entity in self.system.entities.bodies:
 				velocity = self.system.entities.bodies[entity].velocity
 				if keys[player.controls['right']]:
-					velocity[0] = player.speed
+					velocity.x = player.speed
 				if keys[player.controls['left']]:
-					velocity[0] = -player.speed
+					velocity.x = -player.speed
 				if keys[player.controls['jump']]:
 					# Only jump if on the ground
 					if self.system.entities.bodies[entity].bottom == self.system.height:	
-						velocity[1] = -3.5 * player.speed
+						velocity.y = -3.5 * player.speed
 				self.system.entities.bodies[entity].velocity = velocity
 
 class Body(object):
@@ -48,30 +49,29 @@ class Body(object):
 		# Update move properties
 		for entity in self.system.entities.bodies:
 			body = self.system.entities.bodies[entity]
-			# Move body
+			# Move body and apply gravity
 			gravity = 6.0
-			body.move([body.velocity[0], body.velocity[1] + gravity])
+			body.move(body.velocity + vec(0, gravity))
 			# Bounce from window borders
 			if body.left < 0 or body.right > self.system.width:
-				body.velocity[0] *= -0.3
+				body.velocity.x *= -0.3
 			if body.top < 0 or body.bottom > self.system.height:
-				body.velocity[1] *= -0.3
+				body.velocity.y *= -0.3
 			# Dump velocity to simulate frictions
-			body.velocity[0] *= 0.99
-			body.velocity[1] *= 0.99
+			body.velocity *= 0.99
 			# Keep inside window area
 			if body.top < 0:
 				body.top = 0
-				body.real[1] = body.y
+				body.reinitialize_y()
 			if body.bottom > self.system.height:
 				body.bottom = self.system.height
-				body.real[1] = body.y
+				body.reinitialize_y()
 			if body.left < 0:
 				body.left = 0
-				body.real[0] = body.x
+				body.reinitialize_x()
 			if body.right > self.system.width:
 				body.right = self.system.width
-				body.real[0] = body.x
+				body.reinitialize_x()
 			# Store result
 			self.system.entities.bodies[entity] = body
 
