@@ -7,9 +7,9 @@ class Body(pygame.Rect):
 		super().__init__(rect.left, rect.top, rect.width, rect.height)
 		self.real = vec(self.x, self.y)
 		self.velocity = vec()
-		self.dumping = vec(0.0001)
+		self.dumping = vec(0.01)
 		self.friction = vec(0.03, 0)
-		self.bounce = vec(0.3)
+		self.bounce = vec(0.5)
 	def move(self, vector):
 		self.real += vector
 		self.x = int(self.real.x)

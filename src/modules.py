@@ -67,14 +67,15 @@ class Body(object):
 			away_one = (vec(one.centerx, one.centery) - point).normalize()
 			away_two = (vec(two.centerx, two.centery) - point).normalize()
 			# Scale by size of overlapping area
-			away_one.x *= overlap.w / 2
-			away_one.y *= overlap.h / 2
-			away_two.x *= overlap.w / 2
-			away_two.y *= overlap.h / 2
+			away_one *= vec(overlap.w, overlap.h) / 2
+			away_two *= vec(overlap.w, overlap.h) / 2
 			# Scale by objects current velocity ratio
 			velocity_sum = one.velocity.length() + two.velocity.length()
-			away_one *= one.velocity.length() / max(velocity_sum, .001)
-			away_two *= two.velocity.length() / max(velocity_sum, .001)
+			away_one *= one.velocity.length() / max(velocity_sum, .01)
+			away_two *= two.velocity.length() / max(velocity_sum, .01)
+			# Scale up a bit to make cramped situations resolve faster
+			away_one += away_one.normalize() * 1.0
+			away_two += away_two.normalize() * 1.0
 			# Move bodies away from each other
 			one.move(away_one)
 			two.move(away_two)

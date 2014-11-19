@@ -18,7 +18,8 @@ class vec(object):
 		else:
 			return [self.x, self.y]
 	def length(self):
-		return math.sqrt(self * self)
+		dot = (self.x * self.x) + (self.y * self.y)
+		return math.sqrt(dot)
 	def normalize(self):
 		return self / self.length()
 	def __neg__(self):
@@ -36,10 +37,9 @@ class vec(object):
 		return self.__add__(-other)
 	def __mul__(self, other):
 		if isinstance(other, vec):
-			# Multiply two vectors with scalar product
-			return (self.x * other.x) + (self.y * other.y)
+			# Multiplication of two vectors is element wise
+			return vec(self.x * other.x, self.y * other.y)
 		elif isinstance(other, (int, float)):
-			# Multiply vector with number element wise
 			return vec(self.x * other, self.y * other)
 		else:
 			raise TypeError()
@@ -64,7 +64,10 @@ class vec(object):
 	def __isub__(self, other):
 		return self.__iadd__(-other)
 	def __imul__(self, other):
-		if isinstance(other, (int, float)):
+		if isinstance(other, vec):
+			self.x *= other.x
+			self.y *= other.y
+		elif isinstance(other, (int, float)):
 			self.x *= other
 			self.y *= other
 		else:
