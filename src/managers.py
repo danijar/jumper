@@ -7,6 +7,7 @@ class Entities(object):
 		self.bodies = {}
 		self.movements = {}
 		self.players = {}
+		self.texts = {}
 	def create(self):
 		return uuid.uuid4()
 	def remove(self, entity):
@@ -14,3 +15,4 @@ class Entities(object):
 		self.bodies.pop(entity, None)
 		self.movements.pop(entity, None)
 		self.players.pop(entity, None)
+		self.texts.pop(entity, None)

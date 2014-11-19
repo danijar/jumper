@@ -1,3 +1,4 @@
+import os
 import pygame
 from system import System
 from vec import vec
@@ -7,6 +8,7 @@ class Window(object):
 	def __init__(self, system):
 		self.system = system
 		# Set window properties and open it
+		os.environ['SDL_VIDEO_CENTERED'] = '1'
 		pygame.display.set_icon(pygame.image.load("asset/other/icon.png"))
 		pygame.display.set_caption("Window")
 		pygame.display.set_mode((system.width, system.height))
@@ -30,17 +32,16 @@ class Player(object):
 		keys = pygame.key.get_pressed()
 		for entity in self.system.entities.players:
 			player = self.system.entities.players[entity]
-			if entity in self.system.entities.bodies:
-				velocity = self.system.entities.bodies[entity].velocity
+			body = self.system.entities.bodies[entity]
+			if body:
 				if keys[player.controls['right']]:
-					velocity.x = player.speed
+					body.velocity.x = player.speed
 				if keys[player.controls['left']]:
-					velocity.x = -player.speed
+					body.velocity.x = -player.speed
 				if keys[player.controls['jump']]:
 					# Only jump if on the ground
-					if self.system.entities.bodies[entity].bottom == self.system.height:	
-						velocity.y = -3.5 * player.speed
-				self.system.entities.bodies[entity].velocity = velocity
+					if body.bottom == self.system.height:	
+						body.velocity.y = -5.0 * player.speed
 
 class Body(object):
 	def __init__(self, system):
@@ -50,7 +51,7 @@ class Body(object):
 		for entity in self.system.entities.bodies:
 			body = self.system.entities.bodies[entity]
 			# Move body and apply gravity
-			gravity = 6.0
+			gravity = 9.81
 			body.move(body.velocity + vec(0, gravity))
 			# Bounce from window borders
 			if body.left < 0 or body.right > self.system.width:
@@ -58,7 +59,8 @@ class Body(object):
 			if body.top < 0 or body.bottom > self.system.height:
 				body.velocity.y *= -0.3
 			# Dump velocity to simulate frictions
-			body.velocity *= 0.99
+			body.velocity.x *= max(1 - body.dumping.x, 0)
+			body.velocity.y *= max(1 - body.dumping.y, 0)
 			# Keep inside window area
 			if body.top < 0:
 				body.top = 0
@@ -72,8 +74,17 @@ class Body(object):
 			if body.right > self.system.width:
 				body.right = self.system.width
 				body.reinitialize_x()
-			# Store result
-			self.system.entities.bodies[entity] = body
+
+class Text(object):
+	def __init__(self, system):
+		self.system = system
+		self.font = pygame.font.Font('asset/font/source.ttf', 16)
+	def update(self):
+		# Update sprites
+		for entity in self.system.entities.texts:
+			text = self.system.entities.texts[entity]
+			sprite = self.font.render(text, True, (255, 255, 255))
+			self.system.entities.sprites[entity] = sprite
 
 class Sprite(object):
 	def __init__(self, system):
@@ -85,5 +96,8 @@ class Sprite(object):
 		for entity in self.system.entities.sprites:
 			sprite = self.system.entities.sprites.get(entity)
 			body = self.system.entities.bodies.get(entity)
+			text = self.system.entities.texts.get(entity)
 			if body:
 				screen.blit(sprite, body)
+			elif text:
+				screen.blit(sprite, sprite.get_rect())

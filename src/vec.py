@@ -3,7 +3,11 @@ import math
 
 class vec(object):
 	"""Two dimensional vector providing arithmetic operators"""
-	def __init__(self, x=0.0, y=0.0):
+	def __init__(self, x=None, y=None):
+		if x is None:
+			x = 0.0
+		if y is None:
+			y = x
 		self.x = float(x)
 		self.y = float(y)
 	def as_list(self, integer=False):

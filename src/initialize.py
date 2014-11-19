@@ -32,8 +32,9 @@ def initialize(system):
 		entity = system.entities.create()
 		system.entities.sprites[entity] = pygame.image.load("asset/texture/player.png")
 		system.entities.players[entity] = Player()
-		# Add body and center position
+		# Add body and place at bottom center of window
 		body = Body(system.entities.sprites[entity].get_rect())
+		body.dumping.x = 0.5
 		body.bottom = system.height
 		body.centerx = int(system.width / 2)
 		body.real = vec(body.x, body.y)
@@ -45,7 +46,6 @@ def initialize(system):
 		if down: controls['down'] = down
 		if right: controls['right'] = right
 		if jump: controls['jump'] = jump
-		system.entities.players[entity].controls = controls
-		
+
 	create_balls(5)
 	create_player()
