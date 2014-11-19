@@ -1,7 +1,7 @@
 Jumper
 ======
 
-A jump and run game with puzzle solving written in Python.
+A jump and run game with puzzle solving elements written in Python.
 
 Setup
 -----
@@ -23,9 +23,24 @@ To set up the repository, create a virtual environment in its root and install
 dependencies from the requirements file.
 
     virtualenv .
-    Scripts\activate
+    Scripts/activate
     pip install -r requirements.txt
 
 On Windows, you can run the `environment.bat` instead, which will open a
 command promt inside the environment. This script will also create the
 environment and install requirements on first use.
+
+To start the game, run `python src/main.py` inside the virtual environment. On
+Windows, use the `application.bat` script.
+
+Controls
+--------
+
+Key     | Function
+------- | ----------
+`A`     | Move left
+`D`     | Move right
+`Space` | Jump
+
+You can only jump when you are on the ground. However, you can move sideways
+while you are in the air.
