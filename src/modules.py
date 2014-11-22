@@ -29,27 +29,7 @@ class Player(object):
 	def __init__(self, system):
 		self.system = system
 	def update(self):
-		self.update_on_ground()
 		self.update_input()
-	def update_on_ground(self):
-		"""Check if players are standing on the ground"""
-		for entity in self.system.entities.players:
-			player = self.system.entities.players[entity]
-			body = self.system.entities.bodies[entity]
-			# Reset property to check again every frame
-			player.on_ground = False
-			# Early exit if player is standing at bottom of window
-			if body.bottom == self.system.height:
-				player.on_ground = True
-				continue
-			# Check if another body intersects with the player's feet area
-			feet = pygame.Rect(body.left, body.bottom - 0.2, body.w, 0.4)
-			for other in self.system.entities.bodies:
-				if other == entity:
-					continue
-				if self.system.entities.bodies[other].colliderect(feet):
-					player.on_ground = True
-					break
 	def update_input(self):
 		"""Handle movement from user input"""
 		keys = pygame.key.get_pressed()
@@ -62,7 +42,7 @@ class Player(object):
 				if keys[player.controls['left']]:
 					body.velocity.x = -player.speed
 				if keys[player.controls['jump']]:
-					if player.on_ground:
+					if body.on_ground:
 						body.velocity.y = -2.5 * player.speed
 
 class Body(object):
@@ -73,7 +53,8 @@ class Body(object):
 		self.update_movement(delta)
 		self.update_collision()
 		self.update_velocity(delta)
-		self.ensure_inside_window()
+		self.update_inside_window()
+		self.update_on_ground()
 	def update_movement(self, delta):
 		"""Move all bodies according to their velocity"""
 		for body in self.system.entities.bodies.values():
@@ -123,10 +104,10 @@ class Body(object):
 			body.velocity.x *= max(1 - body.dumping.x, 0)
 			body.velocity.y *= max(1 - body.dumping.y, 0)
 			# Simulate friction when on the ground
-			if body.bottom >= self.system.height:
+			if body.on_ground:
 				body.velocity.x *= max(1 - body.friction.x, 0)
 				body.velocity.y *= max(1 - body.friction.y, 0)
-	def ensure_inside_window(self):
+	def update_inside_window(self):
 		"""Keep bodies inside window area"""
 		for body in self.system.entities.bodies.values():
 			if body.top < 0:
@@ -141,6 +122,24 @@ class Body(object):
 			elif body.right > self.system.width:
 				body.right = self.system.width
 				body.reinitialize_x()
+	def update_on_ground(self):
+		"""Check if players are standing on the ground"""
+		for entity in self.system.entities.bodies:
+			body = self.system.entities.bodies[entity]
+			# Reset property to check again every frame
+			body.on_ground = False
+			# Early exit if body is at bottom of window
+			if body.bottom == self.system.height:
+				body.on_ground = True
+				continue
+			# Check if another body intersects with the body's bottom area
+			area = pygame.Rect(body.left, body.bottom - 0.2, body.w, 0.4)
+			for other in self.system.entities.bodies:
+				if other == entity:
+					continue
+				if self.system.entities.bodies[other].colliderect(area):
+					body.on_ground = True
+					break
 	def get_intersecting(self):
 		"""Get all pairs of intersection bodies"""
 		pairs = []

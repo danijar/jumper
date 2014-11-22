@@ -11,6 +11,7 @@ class Body(pygame.Rect):
 		self.friction = vec(0.03, 0)
 		self.restitution = 0.2
 		self.mass = 1.0
+		self.on_ground = False
 	def move(self, vector):
 		self.real += vector
 		self.x = int(self.real.x)
@@ -32,4 +33,3 @@ class Player(object):
 			'right': pygame.K_d,
 			'jump': pygame.K_SPACE,
 		}
-		self.on_ground = False
