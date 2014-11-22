@@ -80,14 +80,19 @@ class Body(object):
 			amount /= one.mass + two.mass
 			impulse = normal * amount
 			# Apply impulse
-			one.velocity -= impulse * (1 / one.mass)
-			two.velocity += impulse * (1 / two.mass)
+			if one.mass > 0:
+				one.velocity -= impulse * (1 / one.mass)
+			if two.mass > 0:
+				two.velocity += impulse * (1 / two.mass)
 		for one, two in pairs:
 			# Prevent objects from moving into each other
 			self.compensate_peneration(one, two)
 	def update_velocity(self, delta):
 		"""Update velocity for the next frame"""
 		for body in self.system.entities.bodies.values():
+			# Skip static bodies
+			if body.mass == 0:
+				continue
 			# Bounce from window border
 			if body.left < 0 or body.right > self.system.width:
 				body.velocity.x *= -body.restitution
@@ -126,6 +131,9 @@ class Body(object):
 		"""Check if players are standing on the ground"""
 		for entity in self.system.entities.bodies:
 			body = self.system.entities.bodies[entity]
+			# Skip static bodies
+			if body.mass == 0:
+				continue
 			# Reset property to check again every frame
 			body.on_ground = False
 			# Early exit if body is at bottom of window
@@ -133,7 +141,8 @@ class Body(object):
 				body.on_ground = True
 				continue
 			# Check if another body intersects with the body's bottom area
-			area = pygame.Rect(body.left, body.bottom - 0.2, body.w, 0.4)
+			threshold = 0.5
+			area = pygame.Rect(body.left, body.bottom - threshold / 2, body.w, threshold)
 			for other in self.system.entities.bodies:
 				if other == entity:
 					continue
@@ -146,6 +155,8 @@ class Body(object):
 		bodies = list(self.system.entities.bodies.values())
 		for i, one in enumerate(bodies):
 			for j, two in enumerate(bodies[i + 1:]):
+				if one.mass == 0 and two.mass == 0:
+					continue
 				if one.colliderect(two):
 					pairs.append((one, two))
 		return pairs
@@ -159,16 +170,24 @@ class Body(object):
 		overlap = two.clip(one)
 		penetration = min(overlap.w, overlap.h) * math.sqrt(2)
 		# Ignore small amount of penetration
-		penetration -= 0.01
+		penetration -= 0.2
 		if penetration < 0:
 			return
+		# Calculate sum of inverse masses
+		masses = 0
+		if one.mass > 0:
+			masses += 1 / one.mass
+		if two.mass > 0:
+			masses += 1 / two.mass
 		# Calculate correction
 		amount = 0.2
-		correction = normal * amount * (penetration / (1 / one.mass) + (1 / two.mass))
+		correction = normal * amount * (penetration / masses)
 		#print(penetration, correction)
 		# Apply correction
-		one.real -= correction * (1 / one.mass)
-		two.real += correction * (1 / two.mass)
+		if one.mass > 0:
+			one.real -= correction * (1 / one.mass)
+		if two.mass > 0:
+			two.real += correction * (1 / two.mass)
 
 class Text(object):
 	def __init__(self, system):
@@ -187,7 +206,7 @@ class Sprite(object):
 	def update(self):
 		# Render sprites
 		screen = pygame.display.get_surface()
-		screen.fill((0, 0, 0))
+		screen.fill((58, 112, 179))
 		text_offset = 0
 		for entity in self.system.entities.sprites:
 			sprite = self.system.entities.sprites.get(entity)
