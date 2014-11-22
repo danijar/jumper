@@ -32,3 +32,4 @@ class Player(object):
 			'right': pygame.K_d,
 			'jump': pygame.K_SPACE,
 		}
+		self.on_ground = False

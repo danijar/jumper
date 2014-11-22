@@ -29,6 +29,29 @@ class Player(object):
 	def __init__(self, system):
 		self.system = system
 	def update(self):
+		self.update_on_ground()
+		self.update_input()
+	def update_on_ground(self):
+		"""Check if players are standing on the ground"""
+		for entity in self.system.entities.players:
+			player = self.system.entities.players[entity]
+			body = self.system.entities.bodies[entity]
+			# Reset property to check again every frame
+			player.on_ground = False
+			# Early exit if player is standing at bottom of window
+			if body.bottom == self.system.height:
+				player.on_ground = True
+				continue
+			# Check if another body intersects with the player's feet area
+			feet = pygame.Rect(body.left, body.bottom - 0.2, body.w, 0.4)
+			for other in self.system.entities.bodies:
+				if other == entity:
+					continue
+				if self.system.entities.bodies[other].colliderect(feet):
+					player.on_ground = True
+					break
+	def update_input(self):
+		"""Handle movement from user input"""
 		keys = pygame.key.get_pressed()
 		for entity in self.system.entities.players:
 			player = self.system.entities.players[entity]
@@ -39,8 +62,7 @@ class Player(object):
 				if keys[player.controls['left']]:
 					body.velocity.x = -player.speed
 				if keys[player.controls['jump']]:
-					# Only jump if on the ground
-					if body.bottom == self.system.height:	
+					if player.on_ground:
 						body.velocity.y = -2.5 * player.speed
 
 class Body(object):
