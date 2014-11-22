@@ -59,8 +59,9 @@ class Body(object):
 			pixel_per_meter = 32
 			body.move(body.velocity * delta * pixel_per_meter)
 	def update_collision(self):
-		"""Compute collisions between bodies"""
-		for one, two in self.get_intersecting():
+		"""Resolve collisions between bodies"""
+		pairs = self.get_intersecting()
+		for one, two in pairs:
 			# Use shortest line between center of bodies as collision normal
 			normal = (vec(two.center) - vec(one.center)).normalize()
 			# Compute relative velocity between bodies along collision normal
@@ -78,6 +79,9 @@ class Body(object):
 			# Apply impulse
 			one.velocity -= impulse * (1 / one.mass)
 			two.velocity += impulse * (1 / two.mass)
+		for one, two in pairs:
+			# Prevent objects from moving into each other
+			self.compensate_peneration(one, two)
 	def update_velocity(self, delta):
 		"""Update velocity for the next frame"""
 		for body in self.system.entities.bodies.values():
@@ -124,6 +128,26 @@ class Body(object):
 				if one.colliderect(two):
 					pairs.append((one, two))
 		return pairs
+	def compensate_peneration(self, one, two):
+		"""Compensate floating point errors that make objects move into each
+		other by manually moving them apart"""
+		# Use shortest line between center of bodies as collision normal
+		# This could be reused from the parent function update_collision()
+		normal = (vec(two.center) - vec(one.center)).normalize()
+		# Approximate penetration
+		overlap = two.clip(one)
+		penetration = min(overlap.w, overlap.h) * math.sqrt(2)
+		# Ignore small amount of penetration
+		penetration -= 0.01
+		if penetration < 0:
+			return
+		# Calculate correction
+		amount = 0.2
+		correction = normal * amount * (penetration / (1 / one.mass) + (1 / two.mass))
+		#print(penetration, correction)
+		# Apply correction
+		one.real -= correction * (1 / one.mass)
+		two.real += correction * (1 / two.mass)
 
 class Text(object):
 	def __init__(self, system):
