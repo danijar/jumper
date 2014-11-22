@@ -3,13 +3,29 @@ import math
 
 class vec(object):
 	"""Two dimensional vector providing arithmetic operators"""
-	def __init__(self, x=None, y=None):
-		if x is None:
-			x = 0.0
-		if y is None:
-			y = x
-		self.x = float(x)
-		self.y = float(y)
+	def __init__(self, *args):
+		count = len(args)
+		one = args[0] if count > 0 else None
+		two = args[1] if count > 1 else None
+		if count == 0:
+			self.x = 0
+			self.y = 0
+		elif count == 1 and isinstance(one, (int, float)):
+			self.x = one
+			self.y = one
+		elif count >= 1 and isinstance(one, object) and hasattr(one, 'x') and hasattr(one, 'y'):
+			self.x = one.x
+			self.y = one.y
+		elif count >= 1 and isinstance(one, (list, tuple)) and len(one) == 2:
+			self.x = one[0]
+			self.y = one[1]
+		elif count == 2 and isinstance(one, (int, float)) and isinstance(two, (int, float)):
+			self.x = one
+			self.y = two
+		else:
+			raise TypeError()
+		self.x = float(self.x)
+		self.y = float(self.y)
 	def as_list(self, integer=False):
 		# Useful for interfaces that expect coordinates as lists
 		if integer:
@@ -22,6 +38,8 @@ class vec(object):
 		return math.sqrt(dot)
 	def normalize(self):
 		return self / self.length()
+	def dot(self, other):
+		return (self.x * other.x) + (self.y * other.y)
 	def __neg__(self):
 		return vec(-self.x, -self.y)
 	def __pos__(self):
@@ -44,13 +62,15 @@ class vec(object):
 		else:
 			raise TypeError()
 	def __truediv__(self, other):
-		if isinstance(other, (int, float)):
-			try:
+		try:
+			if isinstance(other, vec):
+				return vec(self.x / other.x, self.y / other.y)
+			elif isinstance(other, (int, float)):
 				return vec(self.x / other, self.y / other)
-			except ZeroDivisionError:
-				return self
-		else:
-			raise TypeError()
+			else:
+				raise TypeError()
+		except ZeroDivisionError:
+			return self
 	def __iadd__(self, other):
 		if isinstance(other, vec):
 			self.x += other.x

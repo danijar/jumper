@@ -38,7 +38,7 @@ def initialize(system):
 		body.bottom = system.height
 		body.centerx = int(system.width / 2)
 		body.real = vec(body.x, body.y)
-		body.bounce.y = 0
+		body.restitution = 0.2
 		system.entities.bodies[entity] = body
 		# Override provided controls
 		controls = system.entities.players[entity].controls

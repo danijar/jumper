@@ -9,7 +9,8 @@ class Body(pygame.Rect):
 		self.velocity = vec()
 		self.dumping = vec(0.01)
 		self.friction = vec(0.03, 0)
-		self.bounce = vec(0.5)
+		self.restitution = 0.2
+		self.mass = 1.0
 	def move(self, vector):
 		self.real += vector
 		self.x = int(self.real.x)

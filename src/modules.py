@@ -1,4 +1,4 @@
-import os
+import os, math
 import pygame
 from system import System
 from vec import vec
@@ -61,34 +61,31 @@ class Body(object):
 	def update_collision(self):
 		"""Compute collisions between bodies"""
 		for one, two in self.get_intersecting():
-			# Create vectors to move objects out of intersection
-			overlap = one.clip(two)
-			point = vec(overlap.centerx, overlap.centery)
-			away_one = (vec(one.centerx, one.centery) - point).normalize()
-			away_two = (vec(two.centerx, two.centery) - point).normalize()
-			# Scale by size of overlapping area
-			away_one *= vec(overlap.w, overlap.h) / 2
-			away_two *= vec(overlap.w, overlap.h) / 2
-			# Scale by objects current velocity ratio
-			velocity_sum = one.velocity.length() + two.velocity.length()
-			away_one *= one.velocity.length() / max(velocity_sum, .01)
-			away_two *= two.velocity.length() / max(velocity_sum, .01)
-			# Scale up a bit to make cramped situations resolve faster
-			away_one += away_one.normalize() * 1.0
-			away_two += away_two.normalize() * 1.0
-			# Move bodies away from each other
-			one.move(away_one)
-			two.move(away_two)
-			# Swap velocities as a simplification to impulse calculation
-			one.velocity, two.velocity = two.velocity, one.velocity
+			# Use shortest line between center of bodies as collision normal
+			normal = (vec(two.center) - vec(one.center)).normalize()
+			# Compute relative velocity between bodies along collision normal
+			velocity = two.velocity - one.velocity
+			contact_velocity = velocity.dot(normal)
+			# Don't resolve if bodies are already separating
+			if contact_velocity > 0:
+				continue
+			# Use minimum restitution for both bodies
+			restitution = min(one.restitution, two.restitution)
+			# Calculate impulse
+			amount = -(1 + restitution) * contact_velocity
+			amount /= one.mass + two.mass
+			impulse = normal * amount
+			# Apply impulse
+			one.velocity -= impulse * (1 / one.mass)
+			two.velocity += impulse * (1 / two.mass)
 	def update_velocity(self, delta):
 		"""Update velocity for the next frame"""
 		for body in self.system.entities.bodies.values():
 			# Bounce from window border
 			if body.left < 0 or body.right > self.system.width:
-				body.velocity.x *= -body.bounce.x
+				body.velocity.x *= -body.restitution
 			if body.top < 0 or body.bottom > self.system.height:
-				body.velocity.y *= -body.bounce.y
+				body.velocity.y *= -body.restitution
 			# Apply gravity while in the air, on the
 			# ground prevent from trying to move further
 			gravity = 15.0
