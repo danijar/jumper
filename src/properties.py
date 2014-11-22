@@ -25,7 +25,7 @@ class Body(pygame.Rect):
 
 class Player(object):
 	def __init__(self):
-		self.speed = 5.0
+		self.speed = 4.0
 		self.controls = {
 			'up': pygame.K_w,
 			'left': pygame.K_a,

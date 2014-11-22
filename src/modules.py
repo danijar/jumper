@@ -170,7 +170,7 @@ class Body(object):
 		overlap = two.clip(one)
 		penetration = min(overlap.w, overlap.h) * math.sqrt(2)
 		# Ignore small amount of penetration
-		penetration -= 0.2
+		penetration -= 0.05
 		if penetration < 0:
 			return
 		# Calculate sum of inverse masses
@@ -180,7 +180,7 @@ class Body(object):
 		if two.mass > 0:
 			masses += 1 / two.mass
 		# Calculate correction
-		amount = 0.2
+		amount = 0.15
 		correction = normal * amount * (penetration / masses)
 		#print(penetration, correction)
 		# Apply correction
