@@ -86,6 +86,9 @@ class Body(object):
 				two.velocity += impulse * (1 / two.mass)
 			# Prevent objects from moving into each other
 			self.compensate_peneration(one, two)
+			# Stop when moving very short for some frames
+			self.try_to_sleep(one)
+			self.try_to_sleep(two)
 	def update_velocity(self, delta):
 		"""Update velocity for the next frame"""
 		for body in self.system.entities.bodies.values():
@@ -111,22 +114,21 @@ class Body(object):
 			if body.on_ground:
 				body.velocity.x *= max(1 - body.friction.x, 0)
 				body.velocity.y *= max(1 - body.friction.y, 0)
-
 	def update_inside_window(self):
 		"""Keep bodies inside window area"""
 		for body in self.system.entities.bodies.values():
 			if body.top < 0:
 				body.top = 0
-				body.reinitialize_y()
+				body.reinitialize(x=False, y=True)
 			elif body.bottom > self.system.height:
 				body.bottom = self.system.height
-				body.reinitialize_y()
+				body.reinitialize(x=False, y=True)
 			if body.left < 0:
 				body.left = 0
-				body.reinitialize_x()
+				body.reinitialize(x=True, y=False)
 			elif body.right > self.system.width:
 				body.right = self.system.width
-				body.reinitialize_x()
+				body.reinitialize(x=True, y=False)
 	def update_on_ground(self):
 		"""Check if players are standing on the ground"""
 		for entity in self.system.entities.bodies:
@@ -170,11 +172,6 @@ class Body(object):
 		overlap = two.clip(one)
 		overlap.normalize()
 		penetration = min(overlap.w, overlap.h) * math.sqrt(2)
-		# Ignore small amount of penetration
-		tolerance = 0.05
-		penetration -= tolerance
-		if penetration < 0:
-			return
 		# Calculate sum of inverse masses
 		masses = 0
 		if one.mass > 0:
@@ -186,24 +183,40 @@ class Body(object):
 		correction = normal * amount * (penetration / masses)
 		# Apply correction only in x direction
 		if one.mass > 0:
-			one.real.x -= (correction * (1 / one.mass)).x
+			one.move(vec(-correction.x / one.mass, 0), False)
 		if two.mass > 0:
-			two.real.x += (correction * (1 / two.mass)).x
+			two.move(vec(correction.x / two.mass, 0), False)
 		# Additionally, correct stacked objects
+		tolerance = 0.05
 		if overlap.h < overlap.w and overlap.h > tolerance:
 			above = one if one.y < two.y else two
 			below = two if above is one else one
 			if above.mass > 0:
 				# Move out of overlap completely
-				above.real.y -= max(overlap.h, 0.5)
+				way = -max(overlap.h, 0.5)
+				above.move(vec(0, way), False)
 				# Ensure they aren't moving towords anymore
 				above.velocity.y = max(above.velocity.y, 0)
 				# Prevent sliding
 				above.velocity.x = 0
-				# Set body into stable state when it has minimal velocity
-				threshold = 0.005
-				if above.velocity.length() < threshold:
-					above.stop()
+				# Force sleeping in y direction
+				above.stop(x=False, y=True)
+	def try_to_sleep(self, body):
+		"""Set body into stable state when it has minimal velocity"""
+		# Skip if already sleeping
+		if body.velocity == vec(0.0):
+			return
+		# Sum previous movements
+		moved = vec(0)
+		for position in body.last_positions:
+			moved += body.real - position
+		# Stop movement if below threshold
+		threshold_velocity = 1.0
+		threshold_moved = 0.8 * len(body.last_positions)
+		if body.velocity.x < threshold_velocity and abs(moved.x) < threshold_moved:
+			body.stop(x=True, y=False)
+		if body.velocity.y < threshold_velocity and abs(moved.y) < threshold_moved:
+			body.stop(x=False, y=True)
 
 class Text(object):
 	def __init__(self, system):

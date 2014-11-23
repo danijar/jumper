@@ -67,7 +67,7 @@ def initialize(system):
 		# Add body and place at bottom center of window
 		body = Body(system.entities.sprites[entity].get_rect())
 		body.mass = 70.0
-		body.friction.x = 3.0
+		body.friction.x = 10.0
 		body.bottom = system.height
 		body.centerx = int(system.width / 2)
 		body.real = vec(body.x, body.y)
