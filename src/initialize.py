@@ -17,21 +17,7 @@ def initialize(system):
 		system.entities.sprites[entity] = sprite
 		system.entities.bodies[entity] = Body(sprite.get_rect())
 
-	def create_boxes(amount=32):
-		for i in range(amount):
-			entity = create_body("asset/texture/box.png")
-			# Scale randomly
-			length = int(30 + (20 * random.random()))
-			scale(entity, length)
-			# Add body, center position and push them around
-			body = system.entities.bodies[entity]
-			body.bottom = system.height - 50
-			body.centerx = int(system.width / 2)
-			body.real = vec(body.x, body.y)
-			body.velocity.x = 40 * (random.random() - .5)
-			body.velocity.y = -(20 + 20 * random.random())
-
-	def create_platforms(amount=32):
+	def add_platforms(amount=5):
 		for i in range(amount):
 			entity = create_body("asset/texture/platform.png")
 			# Set scale
@@ -45,12 +31,42 @@ def initialize(system):
 			# Make static
 			body.mass = 0
 
-	def create_player(up=None, left=None, down=None, right=None, jump=None):
+	def add_rocks(amount=5):
+		for i in range(amount):
+			entity = create_body("asset/texture/rock.png")
+			# Scale randomly
+			length = int(30 + (20 * random.random()))
+			scale(entity, length)
+			# Add body, center position and push them around
+			body = system.entities.bodies[entity]
+			body.mass = length * length
+			body.bottom = system.height - 50
+			body.centerx = int(system.width / 2)
+			body.real = vec(body.x, body.y)
+			body.velocity.x = 40 * (random.random() - .5)
+			body.velocity.y = -(20 + 20 * random.random())
+
+	def add_balloons(amount=5):
+		for i in range(amount):
+			entity = create_body("asset/texture/balloon.png")
+			# Scale randomly
+			scale(entity, 35)
+			# Add body, center position and push them around
+			body = system.entities.bodies[entity]
+			body.mass = 1.0
+			body.bottom = system.height - 50
+			body.centerx = int(system.width / 2)
+			body.real = vec(body.x, body.y)
+			body.velocity.x = 40 * (random.random() - .5)
+			body.velocity.y = -(20 + 20 * random.random())
+
+	def add_player(up=None, left=None, down=None, right=None, jump=None):
 		entity = system.entities.create()
 		system.entities.sprites[entity] = pygame.image.load("asset/texture/player.png")
 		system.entities.players[entity] = Player()
 		# Add body and place at bottom center of window
 		body = Body(system.entities.sprites[entity].get_rect())
+		body.mass = 70.0
 		body.friction.x = 3.0
 		body.bottom = system.height
 		body.centerx = int(system.width / 2)
@@ -64,6 +80,7 @@ def initialize(system):
 		if right: controls['right'] = right
 		if jump: controls['jump'] = jump
 
-	create_boxes(5)
-	create_platforms(5)
-	create_player()
+	add_platforms(5)
+	add_rocks(5)
+	add_balloons(5)
+	add_player()

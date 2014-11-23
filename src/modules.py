@@ -84,7 +84,6 @@ class Body(object):
 				one.velocity -= impulse * (1 / one.mass)
 			if two.mass > 0:
 				two.velocity += impulse * (1 / two.mass)
-		for one, two in pairs:
 			# Prevent objects from moving into each other
 			self.compensate_peneration(one, two)
 	def update_velocity(self, delta):
@@ -101,7 +100,7 @@ class Body(object):
 			# Apply gravity while in the air, on the
 			# ground prevent from trying to move further
 			gravity = 15.0
-			if body.bottom < self.system.height:
+			if not body.on_ground:
 				body.velocity.y += gravity * delta
 			else:
 				body.velocity.y = min(body.velocity.y, 0)
@@ -112,6 +111,7 @@ class Body(object):
 			if body.on_ground:
 				body.velocity.x *= max(1 - body.friction.x, 0)
 				body.velocity.y *= max(1 - body.friction.y, 0)
+
 	def update_inside_window(self):
 		"""Keep bodies inside window area"""
 		for body in self.system.entities.bodies.values():
@@ -141,7 +141,7 @@ class Body(object):
 				body.on_ground = True
 				continue
 			# Check if another body intersects with the body's bottom area
-			threshold = 0.5
+			threshold = 1.0
 			area = pygame.Rect(body.left, body.bottom - threshold / 2, body.w, threshold)
 			for other in self.system.entities.bodies:
 				if other == entity:
@@ -168,9 +168,11 @@ class Body(object):
 		normal = (vec(two.center) - vec(one.center)).normalize()
 		# Approximate penetration
 		overlap = two.clip(one)
+		overlap.normalize()
 		penetration = min(overlap.w, overlap.h) * math.sqrt(2)
 		# Ignore small amount of penetration
-		penetration -= 0.05
+		tolerance = 0.05
+		penetration -= tolerance
 		if penetration < 0:
 			return
 		# Calculate sum of inverse masses
@@ -180,14 +182,23 @@ class Body(object):
 		if two.mass > 0:
 			masses += 1 / two.mass
 		# Calculate correction
-		amount = 0.15
+		amount = 0.8
 		correction = normal * amount * (penetration / masses)
-		#print(penetration, correction)
-		# Apply correction
+		# Apply correction only in x direction
 		if one.mass > 0:
-			one.real -= correction * (1 / one.mass)
+			one.real.x -= (correction * (1 / one.mass)).x
 		if two.mass > 0:
-			two.real += correction * (1 / two.mass)
+			two.real.x += (correction * (1 / two.mass)).x
+		# Additionally, correct stacked objects
+		if overlap.h < overlap.w and overlap.h > tolerance:
+			above = one if one.y < two.y else two
+			if above.mass > 0:
+				# Move out of overlap completely
+				above.real.y -= overlap.h
+				# Ensure they aren't moving towords anymore
+				above.velocity.y = max(above.velocity.y, 0)
+				# Prevent sliding
+				above.velocity.x = 0
 
 class Text(object):
 	def __init__(self, system):
