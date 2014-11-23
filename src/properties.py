@@ -16,6 +16,12 @@ class Body(pygame.Rect):
 		self.real += vector
 		self.x = int(self.real.x)
 		self.y = int(self.real.y)
+	def stop(self):
+		"""Set body into a stable state where it is not moving and evenly
+		aligned to the pixel grid"""
+		self.velocity = vec(0)
+		self.real.x = self.x
+		self.real.y = self.y
 	def reinitialize_x(self):
 		"""Update float value coordinates from grid position, should
 		be used after setting a coordinate with e.g. body.left"""

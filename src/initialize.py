@@ -80,7 +80,7 @@ def initialize(system):
 		if right: controls['right'] = right
 		if jump: controls['jump'] = jump
 
-	add_platforms(5)
+	add_platforms(7)
 	add_rocks(5)
 	add_balloons(5)
 	add_player()

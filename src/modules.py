@@ -192,13 +192,18 @@ class Body(object):
 		# Additionally, correct stacked objects
 		if overlap.h < overlap.w and overlap.h > tolerance:
 			above = one if one.y < two.y else two
+			below = two if above is one else one
 			if above.mass > 0:
 				# Move out of overlap completely
-				above.real.y -= overlap.h
+				above.real.y -= max(overlap.h, 0.5)
 				# Ensure they aren't moving towords anymore
 				above.velocity.y = max(above.velocity.y, 0)
 				# Prevent sliding
 				above.velocity.x = 0
+				# Set body into stable state when it has minimal velocity
+				threshold = 0.005
+				if above.velocity.length() < threshold:
+					above.stop()
 
 class Text(object):
 	def __init__(self, system):
