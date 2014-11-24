@@ -14,6 +14,7 @@ class Body(pygame.Rect):
 		self.friction = vec(0.03, 0)
 		self.restitution = 0.2
 		self.mass = 1.0
+
 	def move(self, offset, adjust=True):
 		# Cache last position
 		self.last_positions.pop(0)
@@ -23,6 +24,7 @@ class Body(pygame.Rect):
 		if adjust:
 			self.x = int(self.real.x)
 			self.y = int(self.real.y)
+
 	def set(self, position):
 		# Cache last position
 		self.last_positions.pop(0)
@@ -31,6 +33,7 @@ class Body(pygame.Rect):
 		self.real = position
 		self.x = int(self.real.x)
 		self.y = int(self.real.y)
+
 	def stop(self, x=True, y=True):
 		"""Set body into a stable state where it is not moving and evenly
 		aligned to the pixel grid"""
@@ -40,6 +43,7 @@ class Body(pygame.Rect):
 		if y:
 			self.velocity.y = 0
 			self.real.y = self.y
+
 	def reinitialize(self, x=True, y=True):
 		"""Update float value coordinates from grid position, should
 		be used after setting a coordinate with e.g. body.left"""
@@ -47,14 +51,3 @@ class Body(pygame.Rect):
 			self.real.x = float(self.x)
 		if y:
 			self.real.y = float(self.y)
-
-class Player(object):
-	def __init__(self):
-		self.speed = 4.0
-		self.controls = {
-			'up': pygame.K_w,
-			'left': pygame.K_a,
-			'down': pygame.K_s,
-			'right': pygame.K_d,
-			'jump': pygame.K_SPACE,
-		}
