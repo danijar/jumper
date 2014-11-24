@@ -25,8 +25,7 @@ class Body(object):
 			body.on_ground = False
 			# See if stacked objects are still on top, otherwise remove from set
 			for other in body.on_tops.copy():
-				pixel_below = pygame.Rect(other.left, other.top, other.width, other.height + 1)
-				if not body.colliderect(pixel_below):
+				if not other.on_top_of(body):
 					body.on_tops.discard(other)
 
 	def collision(self):
@@ -47,11 +46,13 @@ class Body(object):
 				if one.y < two.y:
 					self.move_apart(one, two, vec(0, -overlap.h))
 					one.on_ground = True
+					two.velocity.y = max(two.velocity.y, 0)
 					if one.mass > 0:
 						two.on_tops.add(one)
 				else:
 					self.move_apart(one, two, vec(0, +overlap.h))
 					two.on_ground = True
+					one.velocity.y = max(one.velocity.y, 0)
 					if two.mass > 0:
 						one.on_tops.add(two)
 
@@ -87,6 +88,7 @@ class Body(object):
 			if body.top < 0:
 				body.top = 0
 				body.reinitialize(x=False, y=True)
+				# body.velocity.x *= -.5
 			elif body.bottom > self.engine.height:
 				body.bottom = self.engine.height
 				body.reinitialize(x=False, y=True)
@@ -94,9 +96,11 @@ class Body(object):
 			if body.left < 0:
 				body.left = 0
 				body.reinitialize(x=True, y=False)
+				# body.velocity.y *= -.5
 			elif body.right > self.engine.width:
 				body.right = self.engine.width
 				body.reinitialize(x=True, y=False)
+				# body.velocity.y *= -.5
 
 	def get_intersecting(self):
 		"""Get all pairs of intersection bodies"""

@@ -25,9 +25,10 @@ class Body(pygame.Rect):
 		self.x = int(self.real.x)
 		self.y = int(self.real.y)
 		# Recursively move bodies stacked on top
-		for body in self.on_tops:
-			# body.move(offset)
-			body.move(vec(offset.x, 0))
+		if abs(offset.x) > 0:
+			for body in self.on_tops:
+				# body.move(offset)
+				body.move(vec(offset.x, 0))
 			
 	def set(self, position):
 		# Overwrite position
@@ -53,3 +54,8 @@ class Body(pygame.Rect):
 			self.real.x = float(self.x)
 		if y:
 			self.real.y = float(self.y)
+
+	def on_top_of(self, body):
+		threshold = 1
+		feet = pygame.Rect(self.left, self.bottom - threshold, self.width, 2 * threshold)
+		return feet.colliderect(body)

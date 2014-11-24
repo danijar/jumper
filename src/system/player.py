@@ -7,10 +7,6 @@ class Player(object):
 
 	def update(self):
 		self.update_input()
-		# Physics debugging
-		for entity in self.engine.entities.players:
-			body = self.engine.entities.bodies[entity]
-			print('\rObjects on player', len(body.on_tops))
 
 	def update_input(self):
 		"""Handle movement from user input"""
