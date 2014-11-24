@@ -2,23 +2,14 @@ import random
 import pygame
 from component.body import Body
 from component.player import Player
+from component.rail import Rail
 from vec import vec
-
-
-class Rail(object):
-	def __init__(self):
-		self.left = 0.0
-		self.right = 0.0
-		self.direction = True
-		self.platforms = []
-		self.speed = 75.0
 
 
 class Level(object):
 	def __init__(self, engine):
 		self.engine = engine
-		self.rails = []
-		self.load('level/level.txt')
+		self.load('asset/level/level.txt')
 
 	def create_body(self, texture, position=vec(0), mass=0):
 		entity = self.engine.entities.create()
@@ -68,8 +59,12 @@ class Level(object):
 		rail = None
 		with open(path) as lines:
 			for y, line in enumerate(lines):
-				for x, symbol in enumerate(line):
+				for x, symbol in enumerate(line + '\n'):
 					position = vec(x * grid, y * grid)
+					# End rail when tile is neither rail nor platform
+					if rail is not None and symbol not in '-#':
+						rail.right = position.x - 1
+						rail = None
 					# Platform
 					if symbol == '#':
 						entity = self.create_body("asset/texture/platform.png", position)
@@ -95,14 +90,12 @@ class Level(object):
 							'jump': pygame.K_UP
 						})
 					# Rail for moving platform
-					# Currently, this assumes that rails end in the same line
+					# Currently, this assumes that rails end is at the same line
 					elif symbol == '-' and rail is None:
+						entity = self.engine.entities.create()
 						rail = Rail()
 						rail.left = position.x
-					elif symbol == ' ' and rail is not None:
-						rail.right = position.x - 1
-						self.rails.append(rail)
-						rail = None
+						self.engine.entities.rails[entity] = rail
 					# Randomly fill with ballons
 					elif random.random() < 0.10:
 						entity = self.create_body("asset/texture/balloon.png", position, 1.0)
@@ -115,20 +108,17 @@ class Level(object):
 
 	def update(self):
 		delta = 1 / 60
-
 		self.platform(delta)
 
 	def platform(self, delta):
-		for rail in self.rails:
+		for rail in self.engine.entities.rails.values():
+			if len(rail.platforms) < 1:
+				continue
 			first = self.engine.entities.bodies[rail.platforms[0]]
 			last = self.engine.entities.bodies[rail.platforms[-1]]
 			if first.left < rail.left:
-				#body.left = rail.left
-				#body.reinitialize()
 				rail.direction = True
 			elif last.right > rail.right:
-				#body.right = rail.right
-				#body.reinitialize()
 				rail.direction = False
 			for entity in rail.platforms:
 				body = self.engine.entities.bodies[entity]
