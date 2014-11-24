@@ -5,7 +5,7 @@ from system.player import Player
 from system.body import Body
 from system.text import Text
 from system.sprite import Sprite
-import level
+from level import Level
 
 # Initialize engine
 pygame.init()
@@ -16,10 +16,10 @@ bodys   = Body(engine)
 texts   = Text(engine)
 sprites = Sprite(engine)
 
-# Add balls and player
-level.initialize(engine)
+# Initialize level
+Level(engine).load('level/level.txt')
 
-# Create text to display frame time
+# Create label to display frame time
 text = engine.entities.create()
 
 # Main loop

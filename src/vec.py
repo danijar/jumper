@@ -26,7 +26,7 @@ class vec(object):
 			raise TypeError()
 		self.x = float(self.x)
 		self.y = float(self.y)
-	def as_list(self, integer=False):
+	def list(self, integer=True):
 		# Useful for interfaces that expect coordinates as lists
 		if integer:
 			# Useful for rendering inside a pixel grid
