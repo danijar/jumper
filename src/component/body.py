@@ -7,7 +7,8 @@ class Body(pygame.Rect):
 		super().__init__(rect.left, rect.top, rect.width, rect.height)
 		self.real = vec(self.x, self.y)
 		self.on_ground = False
-		self.on_tops = set()
+		self.ontops = set()
+		self.underneaths = set()
 		# Physics properties
 		self.velocity = vec()
 		self.dumping = vec(0.01)
@@ -26,8 +27,7 @@ class Body(pygame.Rect):
 		self.y = int(self.real.y)
 		# Recursively move bodies stacked on top
 		if abs(offset.x) > 0:
-			for body in self.on_tops:
-				# body.move(offset)
+			for body in self.ontops:
 				body.move(vec(offset.x, 0))
 			
 	def set(self, position):
@@ -47,7 +47,7 @@ class Body(pygame.Rect):
 			self.velocity.y = 0
 			self.real.y = self.y
 
-	def reinitialize(self, x=True, y=True):
+	def reinitialize(self, x=False, y=False):
 		"""Update float value coordinates from grid position, should
 		be used after setting a coordinate with e.g. body.left"""
 		if x:
@@ -55,7 +55,7 @@ class Body(pygame.Rect):
 		if y:
 			self.real.y = float(self.y)
 
-	def on_top_of(self, body):
-		threshold = 1
+	def stands_on(self, body):
+		threshold = 2
 		feet = pygame.Rect(self.left, self.bottom - threshold, self.width, 2 * threshold)
 		return feet.colliderect(body)

@@ -9,24 +9,43 @@ class Body(object):
 
 	def update(self):
 		delta = 1 / 60
+
+		self.on_ground()
 		self.movement(delta)
 		self.collision()
 		self.inside_window()
 		self.velocity(delta)
+		#self.on_ground()
+
+		# Debugging
+		on_ground = 0
+		for body in self.engine.entities.bodies.values():
+			if body.on_ground:
+				on_ground += 1
+		print('\rOverall', len(self.engine.entities.bodies), 'and', on_ground, 'on ground')
 
 	def movement(self, delta):
 		"""Move all bodies according to their velocity"""
 		for body in self.engine.entities.bodies.values():
 			# Move body by velocity given in meters per second
-			pixel_per_meter = 32
-			body.move(body.velocity * delta * pixel_per_meter)
+			pixels_per_meter = 32
+			body.move(body.velocity * delta * pixels_per_meter)
+
+	def on_ground(self):
 		# Since bodies have moved, relations among them may have become invalid
 		for body in self.engine.entities.bodies.values():
-			body.on_ground = False
-			# See if stacked objects are still on top, otherwise remove from set
-			for other in body.on_tops.copy():
-				if not other.on_top_of(body):
-					body.on_tops.discard(other)
+			# See if stacked objects are still on top
+			for other in body.ontops.copy():
+				if not other.stands_on(body):
+					body.ontops.discard(other)
+			# See if still on top of underneath objects
+			for other in body.underneaths.copy():
+				if not body.stands_on(other):
+					body.underneaths.discard(other)
+			# Update on ground property
+			has_underneaths = len(body.underneaths) > 0
+			window_bottom = body.bottom >= self.engine.height
+			body.on_ground = has_underneaths or window_bottom
 
 	def collision(self):
 		"""Resolve collisions between bodies"""
@@ -45,16 +64,20 @@ class Body(object):
 				# Vertical overlap
 				if one.y < two.y:
 					self.move_apart(one, two, vec(0, -overlap.h))
-					one.on_ground = True
-					two.velocity.y = max(two.velocity.y, 0)
+					# Stack dynamic bodies but stop movement at static ones
 					if one.mass > 0:
-						two.on_tops.add(one)
+						one.underneaths.add(two)
+						two.ontops.add(one)
+					else:
+						two.velocity.y = max(two.velocity.y, 0)
 				else:
 					self.move_apart(one, two, vec(0, +overlap.h))
-					two.on_ground = True
-					one.velocity.y = max(one.velocity.y, 0)
+					# Stack dynamic bodies but stop movement at static ones
 					if two.mass > 0:
-						one.on_tops.add(two)
+						two.underneaths.add(one)
+						one.ontops.add(two)
+					else:
+						one.velocity.y = max(one.velocity.y, 0)
 
 	def velocity(self, delta):
 		"""Update velocity for the next frame"""
@@ -62,11 +85,6 @@ class Body(object):
 			# Skip static bodies
 			if body.mass == 0:
 				continue
-			# Bounce from window border
-			if body.left < 0 or body.right > self.engine.width:
-				body.velocity.x *= -body.restitution
-			if body.top < 0 or body.bottom > self.engine.height:
-				body.velocity.y *= -body.restitution
 			# Apply gravity while in the air, on the
 			# ground prevent from trying to move further
 			gravity = 15.0
@@ -85,22 +103,26 @@ class Body(object):
 	def inside_window(self):
 		"""Keep bodies inside window area"""
 		for body in self.engine.entities.bodies.values():
+			# Skip static bodies
+			if body.mass == 0:
+				continue
+			# Bounce from window border
 			if body.top < 0:
+				body.velocity.y *= -body.restitution
 				body.top = 0
-				body.reinitialize(x=False, y=True)
-				# body.velocity.x *= -.5
+				body.reinitialize(y=True)
 			elif body.bottom > self.engine.height:
+				body.velocity.y *= -body.restitution
 				body.bottom = self.engine.height
-				body.reinitialize(x=False, y=True)
-				body.on_ground = True
+				body.reinitialize(y=True)
 			if body.left < 0:
+				body.velocity.x *= -body.restitution
 				body.left = 0
-				body.reinitialize(x=True, y=False)
-				# body.velocity.y *= -.5
+				body.reinitialize(x=True)
 			elif body.right > self.engine.width:
+				body.velocity.x *= -body.restitution
 				body.right = self.engine.width
-				body.reinitialize(x=True, y=False)
-				# body.velocity.y *= -.5
+				body.reinitialize(x=True)
 
 	def get_intersecting(self):
 		"""Get all pairs of intersection bodies"""
@@ -115,13 +137,16 @@ class Body(object):
 		return pairs
 
 	def move_apart(self, one, two, vector):
-		# Move modies away
-		if one.mass == 0 and two.mass == 0:
+		# Find out which can be moved
+		movable_one = one.mass > 0
+		movable_two = two.mass > 0
+		# Move bodies away
+		if not movable_one and not movable_two:
 			pass
-		elif one.mass > 0 and two.mass == 0:
+		elif movable_one and not movable_two:
 			one.move(vector)
-		elif one.mass == 0 and two.mass > 0:
+		elif not movable_one and movable_two:
 			two.move(-vector)
-		elif one.mass > 0 and two.mass > 0:
+		elif movable_one and movable_two:
 			one.move(vector / 2)
 			two.move(-vector / 2)
