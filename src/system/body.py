@@ -22,7 +22,7 @@ class Body(object):
 			pixel_per_meter = 32
 			body.move(body.velocity * delta * pixel_per_meter)
 
-	def update_collision(self):
+	def update_collision_fuzzy(self):
 		"""Resolve collisions between bodies"""
 		pairs = self.get_intersecting()
 		for one, two in pairs:
@@ -50,6 +50,40 @@ class Body(object):
 			# Stop when moving very short for some frames
 			self.try_to_sleep(one)
 			self.try_to_sleep(two)
+
+	def update_collision(self):
+		"""Resolve collisions between bodies"""
+		pairs = self.get_intersecting()
+		for one, two in pairs:
+			overlap = one.clip(two)
+			overlap.normalize()
+			# Resolve along axis with smaller intersection
+			if overlap.w < overlap.h:
+				# Horizontal overlap
+				if one.x < two.x:
+					self.move_apart(one, two, vec(-overlap.w, 0))
+					one.on_ground = True
+				else:
+					self.move_apart(one, two, vec(+overlap.w, 0))
+					two.on_ground = True
+			else:
+				# Vertical overlap
+				if one.y < two.y:
+					self.move_apart(one, two, vec(0, -overlap.h))
+				else:
+					self.move_apart(one, two, vec(0, +overlap.h))
+
+	def move_apart(self, one, two, vector):
+		# Move modies away
+		if one.mass == 0 and two.mass == 0:
+			pass
+		elif one.mass > 0 and two.mass == 0:
+			one.move(vector)
+		elif one.mass == 0 and two.mass > 0:
+			two.move(-vector)
+		elif one.mass > 0 and two.mass > 0:
+			one.move(vector / 2)
+			two.move(-vector / 2)
 
 	def update_velocity(self, delta):
 		"""Update velocity for the next frame"""
@@ -107,7 +141,7 @@ class Body(object):
 				body.on_ground = True
 				continue
 			# Check if another body intersects with the body's bottom area
-			threshold = 1.0
+			threshold = 2.0
 			area = pygame.Rect(body.left, body.bottom - threshold / 2, body.w, threshold)
 			for other in self.engine.entities.bodies:
 				if other == entity:
