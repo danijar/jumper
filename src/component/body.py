@@ -7,7 +7,7 @@ class Body(pygame.Rect):
 		super().__init__(rect.left, rect.top, rect.width, rect.height)
 		self.real = vec(self.x, self.y)
 		self.on_ground = False
-		self.last_positions = [self.real] * 8
+		self.on_tops = set()
 		# Physics properties
 		self.velocity = vec()
 		self.dumping = vec(0.01)
@@ -15,22 +15,24 @@ class Body(pygame.Rect):
 		self.restitution = 0.2
 		self.mass = 1.0
 
-	def move(self, offset, adjust=True):
-		# Cache last position
-		self.last_positions.pop(0)
-		self.last_positions.append(vec(self.real))
+	def __hash__(self):
+		return id(self)
+
+	def move(self, offset):
 		# Apply movement
 		self.real += offset
-		if adjust:
-			self.x = int(self.real.x)
-			self.y = int(self.real.y)
-
+		# Update integer coordinates
+		self.x = int(self.real.x)
+		self.y = int(self.real.y)
+		# Recursively move bodies stacked on top
+		for body in self.on_tops:
+			# body.move(offset)
+			body.move(vec(offset.x, 0))
+			
 	def set(self, position):
-		# Cache last position
-		self.last_positions.pop(0)
-		self.last_positions.append(vec(self.real))
 		# Overwrite position
 		self.real = position
+		# Update integer coordinates
 		self.x = int(self.real.x)
 		self.y = int(self.real.y)
 
