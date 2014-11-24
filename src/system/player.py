@@ -20,5 +20,5 @@ class Player(object):
 				if keys[player.controls['left']]:
 					body.velocity.x = -player.speed
 				if keys[player.controls['jump']]:
-					if body.on_ground:
+					if body.standing:
 						body.velocity.y = -2.5 * player.speed

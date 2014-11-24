@@ -6,7 +6,7 @@ class Body(pygame.Rect):
 	def __init__(self, rect):
 		super().__init__(rect.left, rect.top, rect.width, rect.height)
 		self.real = vec(self.x, self.y)
-		self.on_ground = False
+		self.standing = False
 		self.ontops = set()
 		self.underneaths = set()
 		# Physics properties

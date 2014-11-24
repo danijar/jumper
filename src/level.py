@@ -72,7 +72,7 @@ def initialize(engine):
 		body.bottom = engine.height
 		body.centerx = int(engine.width / 2)
 		body.real = vec(body.x, body.y)
-		body.restitution = 0.1
+		body.restitution = 0.0
 		engine.entities.bodies[entity] = body
 		# Override provided controls
 		if up:

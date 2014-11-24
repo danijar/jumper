@@ -40,6 +40,8 @@ class vec(object):
 		return self / self.length()
 	def dot(self, other):
 		return (self.x * other.x) + (self.y * other.y)
+	def __pos__(self):
+		return vec(self)
 	def __neg__(self):
 		return vec(-self.x, -self.y)
 	def __pos__(self):
