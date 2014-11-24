@@ -5,9 +5,20 @@ from component.player import Player
 from vec import vec
 
 
+class Rail(object):
+	def __init__(self):
+		self.left = 0.0
+		self.right = 0.0
+		self.direction = True
+		self.platforms = []
+		self.speed = 75.0
+
+
 class Level(object):
 	def __init__(self, engine):
 		self.engine = engine
+		self.rails = []
+		self.load('level/level.txt')
 
 	def create_body(self, texture, position=vec(0), mass=0):
 		entity = self.engine.entities.create()
@@ -54,6 +65,7 @@ class Level(object):
 	
 	def load(self, path):
 		grid = 48
+		rail = None
 		with open(path) as lines:
 			for y, line in enumerate(lines):
 				for x, symbol in enumerate(line):
@@ -62,6 +74,8 @@ class Level(object):
 					if symbol == '#':
 						entity = self.create_body("asset/texture/platform.png", position)
 						self.scale(entity, grid)
+						if rail is not None:
+							rail.platforms.append(entity)
 					# First player
 					elif symbol == 'P':
 						entity = self.create_body("asset/texture/player.png", position)
@@ -80,6 +94,15 @@ class Level(object):
 							'right': pygame.K_RIGHT,
 							'jump': pygame.K_UP
 						})
+					# Rail for moving platform
+					# Currently, this assumes that rails end in the same line
+					elif symbol == '-' and rail is None:
+						rail = Rail()
+						rail.left = position.x
+					elif symbol == ' ' and rail is not None:
+						rail.right = position.x - 1
+						self.rails.append(rail)
+						rail = None
 					# Randomly fill with ballons
 					elif random.random() < 0.10:
 						entity = self.create_body("asset/texture/balloon.png", position, 1.0)
@@ -89,3 +112,27 @@ class Level(object):
 						length = int(30 + (20 * random.random()))
 						entity = self.create_body("asset/texture/rock.png", position, length * length)
 						self.scale(entity, length)
+
+	def update(self):
+		delta = 1 / 60
+
+		self.platform(delta)
+
+	def platform(self, delta):
+		for rail in self.rails:
+			first = self.engine.entities.bodies[rail.platforms[0]]
+			last = self.engine.entities.bodies[rail.platforms[-1]]
+			if first.left < rail.left:
+				#body.left = rail.left
+				#body.reinitialize()
+				rail.direction = True
+			elif last.right > rail.right:
+				#body.right = rail.right
+				#body.reinitialize()
+				rail.direction = False
+			for entity in rail.platforms:
+				body = self.engine.entities.bodies[entity]
+				offset = delta * rail.speed
+				if not rail.direction:
+					offset *= -1
+				body.move(vec(offset, 0))

@@ -5,7 +5,7 @@ from system.player import Player
 from system.body import Body
 from system.text import Text
 from system.sprite import Sprite
-from level import Level
+from system.level import Level
 
 # Initialize engine
 pygame.init()
@@ -15,9 +15,7 @@ players = Player(engine)
 bodys   = Body(engine)
 texts   = Text(engine)
 sprites = Sprite(engine)
-
-# Initialize level
-Level(engine).load('level/level.txt')
+level   = Level(engine)
 
 # Create label to display frame time
 text = engine.entities.create()
@@ -34,6 +32,7 @@ while engine.running:
 	bodys.update()
 	texts.update()
 	sprites.update()
+	level.update()
 
 	# Show render buffer on screen
 	pygame.display.flip()
