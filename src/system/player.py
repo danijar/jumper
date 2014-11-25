@@ -52,5 +52,8 @@ class Player(object):
 	def update_health(self):
 		for entity in self.engine.entities.players.copy():
 			player = self.engine.entities.players[entity]
+			# Player is dead
 			if player.health < 1:
+				# Detach from physics simulation and remove entity
+				self.engine.entities.bodies[entity].detach()
 				self.engine.entities.remove(entity)

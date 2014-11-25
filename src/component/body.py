@@ -59,3 +59,12 @@ class Body(pygame.Rect):
 		threshold = 2
 		feet = pygame.Rect(self.left, self.bottom - threshold, self.width, 2 * threshold)
 		return feet.colliderect(body)
+
+	def detach(self):
+		"""Detach body from physics simulation, by updating touching bodies"""
+		for other in self.ontops:
+			other.underneaths.discard(self)
+			if len(other.underneaths) < 1:
+				other.standing = False
+		for other in self.underneaths:
+			other.ontops.discard(self)
