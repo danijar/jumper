@@ -6,6 +6,8 @@ from system.body import Body
 from system.text import Text
 from system.sprite import Sprite
 from system.level import Level
+from component.text import Text as TextComponent
+
 
 # Initialize engine
 pygame.init()
@@ -18,7 +20,8 @@ sprites = Sprite(engine)
 level   = Level(engine)
 
 # Create label to display frame time
-text = engine.entities.create()
+delta = 0.0
+engine.entities.texts[engine.entities.create()] = TextComponent(lambda: 'Frametime: ' + str(round(delta * 1000, 1)) + 'ms')
 
 # Main loop
 start = 0
@@ -39,7 +42,6 @@ while engine.running:
 
 	# Sleep until frame ends
 	delta = time.clock() - start
-	engine.entities.texts[text] = 'Frametime: ' + str(round(delta * 1000, 1)) + 'ms'
 	wait = max((1 / 60) - delta, 0)
 	time.sleep(wait)
 

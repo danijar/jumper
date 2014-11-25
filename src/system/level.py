@@ -3,6 +3,7 @@ import pygame
 from component.body import Body
 from component.player import Player
 from component.rail import Rail
+from component.text import Text
 from vec import vec
 
 
@@ -34,7 +35,7 @@ class Level(object):
 		body.real += offset
 		body.reinitialize()
 
-	def add_player(self, entity=None, controls=None):
+	def add_player(self, number=1, entity=None, controls=None):
 		if entity is None:
 			entity = self.engine.entities.create()
 		# Load default sprite
@@ -52,6 +53,9 @@ class Level(object):
 		if controls:
 			player.controls = controls
 		self.engine.entities.players[entity] = player
+		# Attach text component for health and ammo display
+		evaluate = lambda: 'Player {0} Health: {1} Ammo: {2}'.format(number, player.health, player.ammo)
+		self.engine.entities.texts[self.engine.entities.create()] = Text(evaluate)
 		return entity
 	
 	def load(self, path):
@@ -76,13 +80,13 @@ class Level(object):
 						entity = self.create_body("asset/texture/player.png", position)
 						self.scale(entity, vec(grid / 1.5, grid))
 						self.move(entity, vec(grid / 1.5, 0))
-						self.add_player(entity)
+						self.add_player(1, entity)
 					# Second player
 					elif symbol == 'Q':
 						entity = self.create_body("asset/texture/player-2.png", position)
 						self.scale(entity, vec(grid / 1.5, grid))
 						self.move(entity, vec(grid / 1.5, 0))
-						self.add_player(entity, {
+						self.add_player(2, entity, {
 							'up': pygame.K_UP,
 							'left': pygame.K_LEFT,
 							'down': pygame.K_DOWN,

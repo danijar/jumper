@@ -11,3 +11,5 @@ class Player(object):
 			'right': pygame.K_d,
 			'jump': pygame.K_SPACE,
 		}
+		self.health = 5
+		self.ammo = 5
