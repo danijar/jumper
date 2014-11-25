@@ -1,6 +1,7 @@
 import random
 import pygame
 from component.body import Body
+from component.character import Character
 from component.player import Player
 from component.rail import Rail
 from component.text import Text
@@ -48,6 +49,9 @@ class Level(object):
 		body.mass = 70.0
 		body.friction.x = 10.0
 		body.restitution = 0.0
+		# Attach default character control
+		character = Character()
+		self.engine.entities.characters[entity] = character
 		# Attach player component and override provided controls
 		player = Player()
 		player.number = number
@@ -55,7 +59,7 @@ class Level(object):
 			player.controls = controls
 		self.engine.entities.players[entity] = player
 		# Attach text component for health and ammo display
-		evaluate = lambda: 'Player {0} Health: {1} Ammo: {2}'.format(number, player.health, player.ammo)
+		evaluate = lambda: 'Player {0} Health: {1} Ammo: {2}'.format(number, character.health, character.ammo)
 		self.engine.entities.texts[entity] = Text(evaluate)
 		return entity
 	

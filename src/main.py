@@ -1,6 +1,7 @@
 import pygame, time
 from engine import Engine
 from system.window import Window
+from system.character import Character
 from system.player import Player
 from system.body import Body
 from system.text import Text
@@ -11,13 +12,14 @@ from component.text import Text as TextComponent
 
 # Initialize engine
 pygame.init()
-engine  = Engine()
-windows = Window(engine)
-players = Player(engine)
-bodys   = Body(engine)
-texts   = Text(engine)
-sprites = Sprite(engine)
-level   = Level(engine)
+engine     = Engine()
+windows    = Window(engine)
+characters = Character(engine)
+players    = Player(engine)
+bodys      = Body(engine)
+texts      = Text(engine)
+sprites    = Sprite(engine)
+level      = Level(engine)
 
 # Create label to display frame time
 delta = 0.0
@@ -32,6 +34,7 @@ while engine.running:
 
 	# Update systems
 	windows.update()
+	characters.update()
 	players.update()
 	bodys.update()
 	sprites.update()

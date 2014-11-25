@@ -6,6 +6,7 @@ class Entities(object):
 		self.sprites = {}
 		self.bodies = {}
 		self.movements = {}
+		self.characters = {}
 		self.players = {}
 		self.texts = {}
 		self.rails = {}
@@ -17,6 +18,7 @@ class Entities(object):
 		self.sprites.pop(entity, None)
 		self.bodies.pop(entity, None)
 		self.movements.pop(entity, None)
+		self.characters.pop(entity, None)
 		self.players.pop(entity, None)
 		self.texts.pop(entity, None)
 		self.rails.pop(entity, None)

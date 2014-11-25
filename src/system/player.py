@@ -10,6 +10,7 @@ class Player(object):
 	def keydown(self, key):
 		for entity in self.engine.entities.players:
 			player = self.engine.entities.players[entity]
+			character = self.engine.entities.characters.get(entity)
 			body = self.engine.entities.bodies.get(entity)
 			# Attack
 			if key == player.controls['attack']:
@@ -18,42 +19,34 @@ class Player(object):
 					if entity == other_entity:
 						continue
 					other_player = self.engine.entities.players[other_entity]
-					other_body = self.engine.entities.bodies[other_entity]
+					other_body = self.engine.entities.bodies.get(other_entity)
+					other_character = self.engine.entities.characters.get(entity)
 					# Compute time from last attack and distance to target
 					now = time.clock()
-					cooldown = now - player.last_attack
+					cooldown = now - character.last_attack
 					distance = (vec(other_body.center) - vec(body.center)).length()
 					# Check if other player near enough and cool down has finished
 					if cooldown > 1.5 and distance < 50.0:
-						if player.ammo > 0:
-							player.last_attack = now
-							player.ammo -= 1
-							other_player.health -= 1
+						if character.ammo > 0:
+							character.last_attack = now
+							character.ammo -= 1
+							other_character.health -= 1
 
 	def update(self):
 		self.update_input()
-		self.update_health()
 
 	def update_input(self):
 		"""Handle movement from user input"""
 		keys = pygame.key.get_pressed()
 		for entity in self.engine.entities.players:
 			player = self.engine.entities.players[entity]
-			body = self.engine.entities.bodies[entity]
+			body = self.engine.entities.bodies.get(entity)
+			character = self.engine.entities.characters.get(entity)
 			if body:
 				if keys[player.controls['right']]:
-					body.velocity.x = player.speed
+					body.velocity.x = character.speed
 				if keys[player.controls['left']]:
-					body.velocity.x = -player.speed
+					body.velocity.x = -character.speed
 				if keys[player.controls['jump']]:
 					if body.standing:
-						body.velocity.y = -2.5 * player.speed
-
-	def update_health(self):
-		for entity in self.engine.entities.players.copy():
-			player = self.engine.entities.players[entity]
-			# Player is dead
-			if player.health < 1:
-				# Detach from physics simulation and remove entity
-				self.engine.entities.bodies[entity].detach()
-				self.engine.entities.remove(entity)
+						body.velocity.y = -2.5 * character.speed
