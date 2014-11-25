@@ -56,7 +56,7 @@ class Level(object):
 		self.engine.entities.players[entity] = player
 		# Attach text component for health and ammo display
 		evaluate = lambda: 'Player {0} Health: {1} Ammo: {2}'.format(number, player.health, player.ammo)
-		self.engine.entities.texts[self.engine.entities.create()] = Text(evaluate)
+		self.engine.entities.texts[entity] = Text(evaluate)
 		return entity
 	
 	def load(self, path):

@@ -11,6 +11,7 @@ class Player(object):
 		for entity in self.engine.entities.players:
 			player = self.engine.entities.players[entity]
 			body = self.engine.entities.bodies.get(entity)
+			# Attack
 			if key == player.controls['attack']:
 				# Find players in range
 				for other_entity in self.engine.entities.players:
@@ -18,6 +19,7 @@ class Player(object):
 						continue
 					other_player = self.engine.entities.players[other_entity]
 					other_body = self.engine.entities.bodies[other_entity]
+					# Check if other player is in distance
 					distance = (vec(other_body.center) - vec(body.center)).length()
 					if distance < 50.0:
 						if player.ammo > 0:

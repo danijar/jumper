@@ -21,7 +21,8 @@ level   = Level(engine)
 
 # Create label to display frame time
 delta = 0.0
-engine.entities.texts[engine.entities.create()] = TextComponent(lambda: 'Frametime: ' + str(round(delta * 1000, 1)) + 'ms')
+evaluate = lambda: 'Frametime: ' + str(round(delta * 1000, 1)) + 'ms'
+engine.entities.texts[engine.entities.create()] = TextComponent(evaluate)
 
 # Main loop
 start = 0
@@ -33,8 +34,8 @@ while engine.running:
 	windows.update()
 	players.update()
 	bodys.update()
-	texts.update()
 	sprites.update()
+	texts.update()
 	level.update()
 
 	# Show render buffer on screen

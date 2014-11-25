@@ -7,9 +7,16 @@ class Text(object):
 		self.font = pygame.font.Font('asset/font/source.ttf', 16)
 
 	def update(self):
-		# Update sprites
+		# Render sprites
+		screen = pygame.display.get_surface()
+		text_offset = 0
 		for entity in self.engine.entities.texts:
+			# Evaluate lambda to get current content
 			text = self.engine.entities.texts[entity]
-			text.content = text.evaluate()
-			sprite = self.font.render(text.content, True, (255, 255, 255))
-			self.engine.entities.sprites[entity] = sprite
+			content = text.evaluate()
+			sprite = self.font.render(content, True, (255, 255, 255))
+			# Render text
+			rect = sprite.get_rect()
+			rect.top = text_offset
+			text_offset = rect.bottom
+			screen.blit(sprite, rect)

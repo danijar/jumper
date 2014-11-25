@@ -16,8 +16,3 @@ class Sprite(object):
 			text = self.engine.entities.texts.get(entity)
 			if body:
 				screen.blit(sprite, body)
-			elif text:
-				rect = sprite.get_rect()
-				rect.top = text_offset
-				text_offset = rect.bottom
-				screen.blit(sprite, rect)
