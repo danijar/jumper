@@ -1,4 +1,5 @@
 import pygame
+from vec import vec
 
 
 class Movement(object):
@@ -11,33 +12,35 @@ class Movement(object):
 			character = self.engine.entities.characters[entity]
 			body = self.engine.entities.bodies[entity]
 			# Get the sign on the axis, this is 1 for right and -1 for left
-			direction = [-1, 1][movement.direction]
+			sign = [-1, 1][movement.direction]
+			new = None
+			# Invert direction if at level boundaries
+			if new is None:
+				if body.left <= 0 or body.right >= self.engine.level.x:
+					new = not movement.direction
 			# Invert direction if there is a static obstacle
-			collider = pygame.Rect(body.left + (direction * character.speed), body.top, body.w, body.h)
-			for other, other_body in self.engine.entities.bodies.items():
-				if other == entity:
-					continue
-				colliding = collider.colliderect(other_body)
-				static = other_body.mass == 0
-				heavy = body.mass < other_body.mass / 2
-				if colliding and (static or heavy):
-					movement.direction = not movement.direction
-					break
-			# Invert direction if there is a gap
-			else:
-				edge = 5
-				collider = pygame.Rect(body.left + (direction * (body.width - edge)), body.top + body.height, body.w, body.h)
+			if new is None:
+				collider = pygame.Rect(body.left + (sign * character.speed), body.top, body.w, body.h)
 				for other, other_body in self.engine.entities.bodies.items():
 					if other == entity:
 						continue
-					colliding = collider.colliderect(other_body)
-					static = other_body.mass == 0
-					heavy = body.mass < other_body.mass / 2
-					if colliding and (static or heavy):
+					if collider.colliderect(other_body):
+						new = not movement.direction
+						break
+			# Invert direction if there is a gap
+			if new is None:
+				edge = 5
+				collider = pygame.Rect(body.left + (sign * (body.width - edge)), body.top + body.height, body.w, body.h)
+				for other, other_body in self.engine.entities.bodies.items():
+					if other == entity:
+						continue
+					if collider.colliderect(other_body):
 						break
 				else:
-					movement.direction = not movement.direction
+					new = not movement.direction
 			# Set movement
+			if new is not None:
+				movement.direction = new
 			if movement.direction:
 				body.velocity.x = character.speed
 			else:
