@@ -50,6 +50,7 @@ class Level(object):
 		body.restitution = 0.0
 		# Attach player component and override provided controls
 		player = Player()
+		player.number = number
 		if controls:
 			player.controls = controls
 		self.engine.entities.players[entity] = player
@@ -91,7 +92,8 @@ class Level(object):
 							'left': pygame.K_LEFT,
 							'down': pygame.K_DOWN,
 							'right': pygame.K_RIGHT,
-							'jump': pygame.K_UP
+							'jump': pygame.K_UP,
+							'attack': pygame.K_RETURN
 						})
 					# Rail for moving platform
 					# Currently, this assumes that rails end is at the same line

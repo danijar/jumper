@@ -19,7 +19,11 @@ class Window(object):
 				self.engine.running = False
 			# User pressed a key
 			elif event.type == pygame.KEYDOWN:
+				# Allow systems to listen to keydown events
+				self.engine.events.fire('keydown', event.key)
+				# Exit on Escape
 				if event.key == pygame.K_ESCAPE:
 					self.engine.running = False
+				# Exit on Ctrl-Z
 				elif event.key == pygame.K_c and event.mod & pygame.KMOD_LCTRL:
 					self.engine.running = False

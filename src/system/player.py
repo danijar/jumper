@@ -4,6 +4,12 @@ import pygame
 class Player(object):
 	def __init__(self, engine):
 		self.engine = engine
+		self.engine.events.listen('keydown', self.keydown)
+
+	def keydown(self, key):
+		for player in self.engine.entities.players.values():
+			if key == player.controls['attack']:
+				print('Player', player.number, 'attacked')
 
 	def update(self):
 		self.update_input()
