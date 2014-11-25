@@ -52,6 +52,7 @@ class Level(object):
 		# Attach default character component
 		character = Character()
 		character.speed = 1.0
+		character.health = 2
 		self.engine.entities.characters[entity] = character
 		# Attach movement behavior
 		self.engine.entities.movements[entity] = Movement()
@@ -102,13 +103,13 @@ class Level(object):
 						if rail is not None:
 							rail.platforms.append(entity)
 					# First player
-					elif symbol == 'P':
+					elif symbol == '1':
 						entity = self.create_body("asset/texture/player.png", position)
 						self.scale(entity, vec(grid / 1.5, grid))
 						self.move(entity, vec(grid / 1.5, 0))
 						self.add_player(1, entity)
 					# Second player
-					elif symbol == 'Q':
+					elif symbol == '2':
 						entity = self.create_body("asset/texture/player-2.png", position)
 						self.scale(entity, vec(grid / 1.5, grid))
 						self.move(entity, vec(grid / 1.5, 0))
@@ -134,11 +135,11 @@ class Level(object):
 						rail.left = position.x
 						self.engine.entities.rails[entity] = rail
 					# Randomly fill with ballons
-					elif random.random() < 0.10:
+					elif random.random() < 0.05:
 						entity = self.create_body("asset/texture/balloon.png", position, 1.0)
 						self.scale(entity, 35)
 					# Randomly fill with rocks
-					elif random.random() < 0.07:
+					elif random.random() < 0.05:
 						length = int(30 + (20 * random.random()))
 						entity = self.create_body("asset/texture/rock.png", position, length * length)
 						self.scale(entity, length)
