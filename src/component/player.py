@@ -9,9 +9,9 @@ class Player(object):
 			'left': pygame.K_a,
 			'down': pygame.K_s,
 			'right': pygame.K_d,
-			'jump': pygame.K_s,
+			'jump': pygame.K_w,
 			'attack': pygame.K_SPACE
 		}
 		self.number = 1
-		self.health = 5
+		self.health = 3
 		self.ammo = 5
