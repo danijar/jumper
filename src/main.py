@@ -3,6 +3,7 @@ from engine import Engine
 from system.window import Window
 from system.character import Character
 from system.player import Player
+from system.movement import Movement
 from system.body import Body
 from system.text import Text
 from system.sprite import Sprite
@@ -16,7 +17,8 @@ engine     = Engine()
 windows    = Window(engine)
 characters = Character(engine)
 players    = Player(engine)
-bodys      = Body(engine)
+movements  = Movement(engine)
+bodies      = Body(engine)
 texts      = Text(engine)
 sprites    = Sprite(engine)
 level      = Level(engine)
@@ -36,7 +38,8 @@ while engine.running:
 	windows.update()
 	characters.update()
 	players.update()
-	bodys.update()
+	movements.update()
+	bodies.update()
 	sprites.update()
 	texts.update()
 	level.update()

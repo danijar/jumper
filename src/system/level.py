@@ -3,6 +3,7 @@ import pygame
 from component.body import Body
 from component.character import Character
 from component.player import Player
+from component.movement import Movement
 from component.rail import Rail
 from component.text import Text
 from vec import vec
@@ -36,6 +37,26 @@ class Level(object):
 		body.real += offset
 		body.reinitialize()
 
+	def add_enemy(self, entity):
+		if entity is None:
+			entity = self.engine.entities.create()
+		# Load default sprite
+		if entity not in self.engine.entities.sprites:
+			self.engine.entities.sprites[entity] = pygame.image.load("asset/texture/enemy.png")
+		# Attach body and tweak parameters
+		if entity not in self.engine.entities.bodies:
+			self.engine.entities.bodies[entity] = Body(self.engine.entities.sprites[entity].get_rect())
+		body = self.engine.entities.bodies[entity]
+		body.mass = 70.0
+		body.friction.x = 10.0
+		# Attach default character component
+		character = Character()
+		character.speed = 1.0
+		self.engine.entities.characters[entity] = character
+		# Attach movement behavior
+		self.engine.entities.movements[entity] = Movement()
+		return entity
+
 	def add_player(self, number=1, entity=None, controls=None):
 		if entity is None:
 			entity = self.engine.entities.create()
@@ -49,7 +70,7 @@ class Level(object):
 		body.mass = 70.0
 		body.friction.x = 10.0
 		body.restitution = 0.0
-		# Attach default character control
+		# Attach default character component
 		character = Character()
 		self.engine.entities.characters[entity] = character
 		# Attach player component and override provided controls
@@ -99,6 +120,12 @@ class Level(object):
 							'jump': pygame.K_UP,
 							'attack': pygame.K_RETURN
 						})
+					# Add enemy
+					elif symbol == 'A':
+						entity = self.create_body("asset/texture/enemy.png", position)
+						self.scale(entity, vec(grid / 1.5, grid))
+						self.move(entity, vec(grid / 1.5, 0))
+						self.add_enemy(entity)
 					# Rail for moving platform
 					# Currently, this assumes that rails end is at the same line
 					elif symbol == '-' and rail is None:
