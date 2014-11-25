@@ -1,4 +1,4 @@
-import pygame
+import pygame, time
 from vec import vec
 
 
@@ -19,10 +19,14 @@ class Player(object):
 						continue
 					other_player = self.engine.entities.players[other_entity]
 					other_body = self.engine.entities.bodies[other_entity]
-					# Check if other player is in distance
+					# Compute time from last attack and distance to target
+					now = time.clock()
+					cooldown = now - player.last_attack
 					distance = (vec(other_body.center) - vec(body.center)).length()
-					if distance < 50.0:
+					# Check if other player near enough and cool down has finished
+					if cooldown > 1.5 and distance < 50.0:
 						if player.ammo > 0:
+							player.last_attack = now
 							player.ammo -= 1
 							other_player.health -= 1
 

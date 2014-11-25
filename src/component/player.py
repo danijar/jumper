@@ -1,4 +1,4 @@
-import pygame
+import pygame, time
 
 
 class Player(object):
@@ -15,3 +15,4 @@ class Player(object):
 		self.number = 1
 		self.health = 3
 		self.ammo = 5
+		self.last_attack = time.clock()
