@@ -1,5 +1,6 @@
 import pygame
 from managers import Entities, Events
+from vec import vec
 
 
 class Engine(object):
@@ -9,3 +10,4 @@ class Engine(object):
 		self.running = True
 		self.width = 640
 		self.height = 480
+		self.scroll = vec()

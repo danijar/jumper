@@ -12,7 +12,10 @@ from vec import vec
 class Level(object):
 	def __init__(self, engine):
 		self.engine = engine
+		self.width = 0
+		self.height = 0
 		self.load('asset/level/level.txt')
+		print(self.width)
 
 	def create_body(self, texture, position=vec(0), mass=0):
 		entity = self.engine.entities.create()
@@ -81,17 +84,23 @@ class Level(object):
 			player.controls = controls
 		self.engine.entities.players[entity] = player
 		# Attach text component for health and ammo display
-		evaluate = lambda: 'Player {0} Health: {1} Ammo: {2}'.format(number, character.health, character.ammo)
+		evaluate = lambda: 'Player {0} has {1} lifes left.'.format(number, character.health)
 		self.engine.entities.texts[entity] = Text(evaluate)
 		return entity
 	
 	def load(self, path):
 		grid = 48
 		rail = None
+		position = vec()
 		with open(path) as lines:
 			for y, line in enumerate(lines):
-				for x, symbol in enumerate(line + '\n'):
+				for x, symbol in enumerate(line[:-1]):
 					position = vec(x * grid, y * grid)
+					# Remember level boundaries
+					if position.x + grid > self.width:
+						self.width = position.x + grid
+					if position.y + grid > self.height:
+						self.height = position.y + grid
 					# End rail when tile is neither rail nor platform
 					if rail is not None and symbol not in '-#':
 						rail.right = position.x - 1
@@ -128,7 +137,6 @@ class Level(object):
 						self.move(entity, vec(grid / 1.5, 0))
 						self.add_enemy(entity)
 					# Rail for moving platform
-					# Currently, this assumes that rails end is at the same line
 					elif symbol == '-' and rail is None:
 						entity = self.engine.entities.create()
 						rail = Rail()
@@ -143,12 +151,39 @@ class Level(object):
 						length = int(30 + (20 * random.random()))
 						entity = self.create_body("asset/texture/rock.png", position, length * length)
 						self.scale(entity, length)
+				# End rail when line ends
+				if rail is not None:
+					rail.right = position.x - 1
+					rail = None
 
 	def update(self):
 		delta = 1 / 60
-		self.platform(delta)
+		self.scroll()
+		self.rail(delta)
 
-	def platform(self, delta):
+	def scroll(self):
+		# Find player one
+		entity = None
+		for i, player in self.engine.entities.players.items():
+			if player.number == 1:
+				entity = i
+				break
+		if entity is None:
+			return
+		# Scroll level to center player
+		body = self.engine.entities.bodies[entity]
+		self.engine.scroll = vec(body.center) - (vec(self.engine.width, self.engine.height) / 2)
+		# Clamp scroll to level borders
+		if self.engine.scroll.x < 0:
+			self.engine.scroll.x = 0
+		elif self.engine.scroll.x > self.width - self.engine.width:
+			self.engine.scroll.x = self.width - self.engine.width
+		if self.engine.scroll.y < 0:
+			self.engine.scroll.y = 0
+		elif self.engine.scroll.y > self.height - self.engine.height:
+			self.engine.scroll.y = self.height - self.engine.height
+
+	def rail(self, delta):
 		for rail in self.engine.entities.rails.values():
 			if len(rail.platforms) < 1:
 				continue

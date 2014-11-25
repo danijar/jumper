@@ -27,15 +27,13 @@ class Player(object):
 					distance = (vec(other_body.center) - vec(body.center)).length()
 					# Check if other player near enough and cool down has finished
 					if cooldown > 1.5 and distance < 50.0:
-						if character.ammo > 0:
-							character.last_attack = now
-							character.ammo -= 1
-							other_character.health -= 1
+						character.last_attack = now
+						other_character.health -= 1
 
 	def update(self):
-		self.update_input()
-
-	def update_input(self):
+		self.input()
+		
+	def input(self):
 		"""Handle movement from user input"""
 		keys = pygame.key.get_pressed()
 		for entity in self.engine.entities.players:
@@ -50,3 +48,4 @@ class Player(object):
 				if keys[player.controls['jump']]:
 					if body.standing:
 						body.velocity.y = -2.5 * character.speed
+

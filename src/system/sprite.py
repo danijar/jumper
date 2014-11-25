@@ -15,4 +15,6 @@ class Sprite(object):
 			body = self.engine.entities.bodies.get(entity)
 			text = self.engine.entities.texts.get(entity)
 			if body:
-				screen.blit(sprite, body)
+				x = body.left - self.engine.scroll.x
+				y = body.top - self.engine.scroll.y
+				screen.blit(sprite, (x, y))

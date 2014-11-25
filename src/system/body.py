@@ -15,7 +15,7 @@ class Body(object):
 		self.standing()
 		self.movement(delta)
 		self.collision()
-		self.inside_window()
+		#self.inside_window()
 		self.velocity(delta)
 		self.standing()
 
@@ -38,9 +38,7 @@ class Body(object):
 				if not body.stands_on(other):
 					body.underneaths.discard(other)
 			# Update standing property
-			has_underneaths = len(body.underneaths) > 0
-			window_bottom = body.bottom >= self.engine.height
-			body.standing = has_underneaths or window_bottom
+			body.standing = len(body.underneaths) > 0
 
 	def collision(self):
 		"""Resolve collisions between bodies"""
