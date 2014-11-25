@@ -12,10 +12,7 @@ from vec import vec
 class Level(object):
 	def __init__(self, engine):
 		self.engine = engine
-		self.width = 0
-		self.height = 0
 		self.load('asset/level/level.txt')
-		print(self.width)
 
 	def create_body(self, texture, position=vec(0), mass=0):
 		entity = self.engine.entities.create()
@@ -97,10 +94,10 @@ class Level(object):
 				for x, symbol in enumerate(line[:-1]):
 					position = vec(x * grid, y * grid)
 					# Remember level boundaries
-					if position.x + grid > self.width:
-						self.width = position.x + grid
-					if position.y + grid > self.height:
-						self.height = position.y + grid
+					if position.x + grid > self.engine.level.x:
+						self.engine.level.x = position.x + grid
+					if position.y + grid > self.engine.level.y:
+						self.engine.level.y = position.y + grid
 					# End rail when tile is neither rail nor platform
 					if rail is not None and symbol not in '-#':
 						rail.right = position.x - 1
@@ -176,12 +173,12 @@ class Level(object):
 		# Clamp scroll to level borders
 		if self.engine.scroll.x < 0:
 			self.engine.scroll.x = 0
-		elif self.engine.scroll.x > self.width - self.engine.width:
-			self.engine.scroll.x = self.width - self.engine.width
+		elif self.engine.scroll.x > self.engine.level.x - self.engine.width:
+			self.engine.scroll.x = self.engine.level.x - self.engine.width
 		if self.engine.scroll.y < 0:
 			self.engine.scroll.y = 0
-		elif self.engine.scroll.y > self.height - self.engine.height:
-			self.engine.scroll.y = self.height - self.engine.height
+		elif self.engine.scroll.y > self.engine.level.y - self.engine.height:
+			self.engine.scroll.y = self.engine.level.y - self.engine.height
 
 	def rail(self, delta):
 		for rail in self.engine.entities.rails.values():

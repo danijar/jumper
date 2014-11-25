@@ -15,7 +15,7 @@ class Body(object):
 		self.standing()
 		self.movement(delta)
 		self.collision()
-		#self.inside_window()
+		self.inside_level()
 		self.velocity(delta)
 		self.standing()
 
@@ -93,29 +93,29 @@ class Body(object):
 				body.velocity.x *= max(1 - body.friction.x, 0)
 				body.velocity.y *= max(1 - body.friction.y, 0)
 
-	def inside_window(self):
+	def inside_level(self):
 		"""Keep bodies inside window area"""
 		for body in self.engine.entities.bodies.values():
 			# Skip static bodies
 			if body.mass == 0:
 				continue
-			# Bounce from window border. This includes both inverting velocity
+			# Bounce from level border. This includes both inverting velocity
 			# relative to the restitution factor, and ensuring the body's
 			# position to be inside.
 			if body.top < 0:
 				body.top = 0
 				body.reinitialize(y=True)
 				body.velocity.y *= -body.restitution
-			elif body.bottom > self.engine.height:
-				body.bottom = self.engine.height
+			elif body.bottom > self.engine.level.y:
+				body.bottom = self.engine.level.y
 				body.reinitialize(y=True)
 				body.velocity.y *= -body.restitution
 			if body.left < 0:
 				body.left = 0
 				body.reinitialize(x=True)
 				body.velocity.x *= -body.restitution
-			elif body.right > self.engine.width:
-				body.right = self.engine.width
+			elif body.right > self.engine.level.x:
+				body.right = self.engine.level.x
 				body.reinitialize(x=True)
 				body.velocity.x *= -body.restitution
 

@@ -10,4 +10,5 @@ class Engine(object):
 		self.running = True
 		self.width = 640
 		self.height = 480
+		self.level = vec()
 		self.scroll = vec()
