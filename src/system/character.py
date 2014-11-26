@@ -7,10 +7,7 @@ class Character(object):
 		self.engine = engine
 
 	def update(self):
-		self.update_health()
-
-	def update_health(self):
-		bounce = 0.2
+		bounce = 0.15
 		for entity in self.engine.entities.characters.copy():
 			character = self.engine.entities.characters[entity]
 			# Update enemies
@@ -28,12 +25,17 @@ class Character(object):
 						continue
 					other_body = self.engine.entities.bodies[other_entity]
 					other_character = self.engine.entities.characters[other_entity]
+					# Check if player wasn't hit a few ticks ago
+					now = time.clock()
+					if other_character.last_hit and now - other_character.last_hit < other_character.hit_time:
+						continue
 					# Check if overlapping with player body, allow feet
 					collider = pygame.Rect(other_body.left - 1, other_body.top, other_body.w + 2, other_body.h - 1)
 					if body.colliderect(collider):
+						other_character.last_hit = now
 						other_character.health -= 1
 						normal = (vec(other_body) - vec(body) + vec(0, -20)).normalize()
-						other_body.velocity += normal * body.mass * bounce
+						other_body.velocity = normal * body.mass * bounce
 			# Remove dead characters
 			if character.health < 1:
 				# Detach from physics simulation and remove entity

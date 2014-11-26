@@ -21,14 +21,15 @@ class Player(object):
 					other_player = self.engine.entities.players[other_entity]
 					other_body = self.engine.entities.bodies.get(other_entity)
 					other_character = self.engine.entities.characters.get(entity)
-					# Compute time from last attack and distance to target
-					now = time.clock()
-					cooldown = now - character.last_attack
-					distance = (vec(other_body.center) - vec(body.center)).length()
 					# Check if other player near enough and cool down has finished
-					if cooldown > 1.5 and distance < 50.0:
-						character.last_attack = now
-						other_character.health -= 1
+					now = time.clock()
+					if now - character.last_attack < character.attack_time:
+						continue
+					if (vec(other_body.center) - vec(body.center)).length() < character.attack_range:
+						continue
+					# Perform attack
+					character.last_attack = now
+					other_character.health -= 1
 
 	def update(self):
 		self.input()
@@ -40,6 +41,10 @@ class Player(object):
 			player = self.engine.entities.players[entity]
 			body = self.engine.entities.bodies.get(entity)
 			character = self.engine.entities.characters.get(entity)
+			# Freeze player for a while after being hit
+			if character.last_hit and time.clock() - character.last_hit < character.hit_time:
+				continue
+			# Move body by user input
 			if body:
 				if keys[player.controls['right']]:
 					body.velocity.x = character.speed
