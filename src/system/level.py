@@ -1,4 +1,5 @@
 import random
+from operator import attrgetter
 import pygame
 from component.body import Body
 from component.character import Character
@@ -160,13 +161,9 @@ class Level(object):
 
 	def scroll(self):
 		# Find player one
-		entity = None
-		for i, player in self.engine.entities.players.items():
-			if player.number == 1:
-				entity = i
-				break
-		if entity is None:
+		if len(self.engine.entities.players) < 1:
 			return
+		entity = min(self.engine.entities.players.items(), key=lambda x: x[1].number)[0]
 		# Scroll level to center player
 		body = self.engine.entities.bodies[entity]
 		self.engine.scroll = vec(body.center) - (vec(self.engine.width, self.engine.height) / 2)

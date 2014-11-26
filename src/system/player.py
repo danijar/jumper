@@ -37,11 +37,11 @@ class Player(object):
 		"""Event handler for key down events"""
 		for entity, player in self.engine.entities.players.items():
 			if key == player.controls['attack']:
-				self.attack(player)
+				self.attack(entity)
 
 	def attack(self, entity):
 		"""Try to attack other players in range"""
-		# Fetch components
+		# Fetch components		
 		body = self.engine.entities.bodies.get(entity)
 		character = self.engine.entities.characters.get(entity)
 		if not body or not character:
@@ -52,7 +52,7 @@ class Player(object):
 				continue
 			# Fetch components
 			other_body = self.engine.entities.bodies.get(other_entity)
-			other_character = self.engine.entities.characters.get(entity)
+			other_character = self.engine.entities.characters.get(other_entity)
 			if not other_body or not other_character:
 				continue
 			# Check if other player near enough and cool down has finished
