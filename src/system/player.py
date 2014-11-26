@@ -23,9 +23,9 @@ class Player(object):
 					other_character = self.engine.entities.characters.get(entity)
 					# Check if other player near enough and cool down has finished
 					now = time.clock()
-					if now - character.last_attack < character.attack_time:
+					if character.last_attack and now - character.last_attack < character.attack_time:
 						continue
-					if (vec(other_body.center) - vec(body.center)).length() < character.attack_range:
+					if (vec(other_body.center) - vec(body.center)).length() > character.attack_range:
 						continue
 					# Perform attack
 					character.last_attack = now
