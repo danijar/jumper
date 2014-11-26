@@ -8,25 +8,26 @@ class Body(object):
 		self.engine = engine
 
 	def update(self):
+		"""Update all sub systems"""
 		delta = 1 / 60
-		# Update all sub systems. Standing objects must be determined as first
-		# step for the other physics calculations and also at the end so that
-		# other systems read the resulting state.
-		self.standing()
-		self.movement(delta)
-		self.collision()
-		self.inside_level()
-		self.velocity(delta)
-		self.standing()
+		# Standing objects must be determined as first step for the other
+		# physics calculations and also at the end so that other systems read
+		# the resulting state.
+		self.update_standings()
+		self.update_movements(delta)
+		self.update_collisions()
+		self.update_insides()
+		self.update_velocities(delta)
+		self.update_standings()
 
-	def movement(self, delta):
+	def update_movements(self, delta):
 		"""Move all bodies according to their velocity"""
 		for body in self.engine.entities.bodies.values():
 			# Move body by velocity given in meters per second
 			pixels_per_meter = 32
 			body.move(body.velocity * delta * pixels_per_meter)
 
-	def standing(self):
+	def update_standings(self):
 		# Since bodies have moved, relations among them may have become invalid
 		for body in self.engine.entities.bodies.values():
 			# See if stacked objects are still on top
@@ -40,39 +41,20 @@ class Body(object):
 			# Update standing property
 			body.standing = len(body.underneaths) > 0
 
-	def collision(self):
+	def update_collisions(self):
 		"""Resolve collisions between bodies"""
 		pairs = self.get_intersecting()
 		for one, two in pairs:
 			# Resolve collision along the axis with smaller intersection
 			overlap = one.clip(two)
 			overlap.normalize()
-			# Horizontal overlap
-			if overlap.w < overlap.h:
-				if one.x < two.x:
-					self.move_apart(one, two, vec(-overlap.w, 0))
-				else:
-					self.move_apart(one, two, vec(+overlap.w, 0))
-			# Vertical overlap
+			# Resolve shorter direction
+			if abs(overlap.w) < abs(overlap.h):
+				self.horizontal_collision(one, two, overlap)
 			else:
-				if one.y < two.y:
-					self.move_apart(one, two, vec(0, -overlap.h))
-					# Stack dynamic bodies but stop movement at static ones
-					if one.mass > 0:
-						one.underneaths.add(two)
-						two.ontops.add(one)
-					else:
-						two.velocity.y = max(two.velocity.y, 0)
-				else:
-					self.move_apart(one, two, vec(0, +overlap.h))
-					# Stack dynamic bodies but stop movement at static ones
-					if two.mass > 0:
-						two.underneaths.add(one)
-						one.ontops.add(two)
-					else:
-						one.velocity.y = max(one.velocity.y, 0)
+				self.vertical_collision(one, two, overlap)
 
-	def velocity(self, delta):
+	def update_velocities(self, delta):
 		"""Update velocity for the next frame"""
 		for body in self.engine.entities.bodies.values():
 			# Skip static bodies
@@ -93,7 +75,7 @@ class Body(object):
 				body.velocity.x *= max(1 - body.friction.x, 0)
 				body.velocity.y *= max(1 - body.friction.y, 0)
 
-	def inside_level(self):
+	def update_insides(self):
 		"""Keep bodies inside window area"""
 		for body in self.engine.entities.bodies.values():
 			# Skip static bodies
@@ -136,6 +118,23 @@ class Body(object):
 					pairs.append((one, two))
 		return pairs
 
+	def horizontal_collision(self, one, two, overlap):
+		# Move bodies apart
+		way = -overlap.w if one.x < two.x else overlap.w
+		self.move_apart(one, two, vec(way, 0))
+		
+	def vertical_collision(self, one, two, overlap):
+		above, below = (one, two) if one.y < two.y else (two, one)
+		# Move bodies apart
+		way = -overlap.h if one.y < two.y else overlap.h
+		self.move_apart(one, two, vec(0, way))
+		# Stack dynamic bodies but stop movement at static ones
+		if above.mass > 0:
+			above.underneaths.add(below)
+			below.ontops.add(above)
+		else:
+			below.velocity.y = max(below.velocity.y, 0)
+		
 	def move_apart(self, one, two, vector):
 		"""Move two intersecting bodies apart, taking their mass into account"""
 		# Find out which bodies can be moved, a mass of zero means static

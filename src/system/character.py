@@ -7,37 +7,53 @@ class Character(object):
 		self.engine = engine
 
 	def update(self):
-		bounce = 0.15
-		for entity in self.engine.entities.characters.copy():
-			character = self.engine.entities.characters[entity]
-			# Update enemies
-			if entity not in self.engine.entities.players:
-				body = self.engine.entities.bodies[entity]
-				# Hit enemies when objects fall on them
-				for other in body.ontops.copy():
-					character.health -= 1
-					other.velocity.y -= body.mass * bounce
-					body.ontops.remove(other)
-					other.underneaths.remove(body)
-				# Hit players when enemies walk into them
-				for other_entity in self.engine.entities.players:
-					if other_entity == entity:
-						continue
-					other_body = self.engine.entities.bodies[other_entity]
-					other_character = self.engine.entities.characters[other_entity]
-					# Check if player wasn't hit a few ticks ago
-					now = time.clock()
-					if other_character.last_hit and now - other_character.last_hit < other_character.hit_time:
-						continue
-					# Check if overlapping with player body, allow feet
-					collider = pygame.Rect(other_body.left - 1, other_body.top, other_body.w + 2, other_body.h - 1)
-					if body.colliderect(collider):
-						other_character.last_hit = now
-						other_character.health -= 1
-						normal = (vec(other_body) - vec(body) + vec(0, -20)).normalize()
-						other_body.velocity = normal * body.mass * bounce
-			# Remove dead characters
+		"""Update all sub systems"""
+		self.update_healths()
+		self.update_hits()
+		self.update_attacks()
+
+	def update_healths(self):
+		"""Remove dead characters"""
+		for entity, character in self.engine.entities.characters.copy().items():
 			if character.health < 1:
 				# Detach from physics simulation and remove entity
 				self.engine.entities.bodies[entity].detach()
 				self.engine.entities.remove(entity)
+
+	def update_hits(self):
+		"""Hit enemies when objects fall on them"""
+		for entity, character in self.engine.entities.characters.copy().items():
+			# Skip players to allow them move objects on their head
+			if entity in self.engine.entities.players:
+				continue
+			# Fetch components
+			body = self.engine.entities.bodies.get(entity)
+			if not body:
+				continue
+			# Hit enemy for each object on top
+			for other in body.ontops.copy():
+				character.hit()
+				other.bounce_from(body)
+
+	def update_attacks(self):
+		"""Attack players when they walk into enemies"""
+		for enemy in self.engine.entities.characters.copy():
+			# Skip players to allow them move objects on their head
+			if enemy in self.engine.entities.players:
+				continue
+			# Fetch components
+			enemy_body = self.engine.entities.bodies.get(enemy)
+			enemy_character = self.engine.entities.characters.get(enemy)
+			if not enemy_body or not enemy_character:
+				continue
+			# Let enemies attack players they walk into
+			for player in self.engine.entities.players:
+				player_body = self.engine.entities.bodies.get(player)
+				player_character = self.engine.entities.characters.get(player)
+				if not player_body or not player_character:
+					continue
+				# Check if overlapping with player upper part of body,
+				# touching only with feet is allowed for jumping onto them
+				if player_body.collide_upper(enemy_body):
+					if enemy_character.attack(player_character):
+						player_body.bounce_from(enemy_body)

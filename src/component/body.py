@@ -68,3 +68,25 @@ class Body(pygame.Rect):
 				other.standing = False
 		for other in self.underneaths:
 			other.ontops.discard(self)
+
+	def bounce_from(self, other, magnitude=700.0):
+		"""Bounce away from another body"""
+		# Calculate direction
+		offset = vec(0, -32)
+		normal = (self.real - other.real + offset).normalize()
+		# Apply bounce
+		restitution = min(self.restitution, other.restitution)
+		overall_mass = self.mass + other.mass
+		self.velocity = normal * magnitude / overall_mass
+		# Remove bodies from each other
+		other.ontops.discard(self)
+		other.underneaths.discard(self)
+		self.ontops.discard(other)
+		self.underneaths.discard(other)
+
+	def collide_upper(self, other):
+		"""Check if overlapping with a rectangle, but ignore the bottom pixel.
+		Useful to check if touching another body from the side but not standing
+		on top of it."""
+		upper = pygame.Rect(self.left - 1, self.top, self.w + 2, self.h - 1)
+		return upper.colliderect(other)
