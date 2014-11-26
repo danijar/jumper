@@ -140,9 +140,9 @@ class Level(object):
 						rail = Rail()
 						rail.left = position.x
 						self.engine.entities.rails[entity] = rail
-					# Randomly fill with ballons
+					# Randomly fill with boxes
 					elif random.random() < 0.05:
-						entity = self.create_body("asset/texture/balloon.png", position, 1.0)
+						entity = self.create_body("asset/texture/box.png", position, 25.0)
 						self.scale(entity, 35)
 					# Randomly fill with rocks
 					elif random.random() < 0.05:
