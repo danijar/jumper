@@ -8,7 +8,7 @@ class Sprite(object):
 	def update(self):
 		# Render sprites
 		screen = pygame.display.get_surface()
-		screen.fill((58, 112, 179))
+		screen.fill((93, 116, 126))
 		text_offset = 0
 		for entity in self.engine.entities.sprites:
 			sprite = self.engine.entities.sprites.get(entity)
