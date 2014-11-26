@@ -41,7 +41,7 @@ class Player(object):
 
 	def attack(self, entity):
 		"""Try to attack other players in range"""
-		# Fetch properties
+		# Fetch components
 		body = self.engine.entities.bodies.get(entity)
 		character = self.engine.entities.characters.get(entity)
 		if not body or not character:
@@ -50,7 +50,7 @@ class Player(object):
 		for other_entity in self.engine.entities.players:
 			if entity == other_entity:
 				continue
-			# Fetch properties
+			# Fetch components
 			other_body = self.engine.entities.bodies.get(other_entity)
 			other_character = self.engine.entities.characters.get(entity)
 			if not other_body or not other_character:
