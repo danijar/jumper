@@ -3,8 +3,10 @@ Jumper
 
 A jump and run game with puzzle solving elements written in Python.
 
-Setup
------
+![Screenshot](screenshot/2014-12-13.png?raw=true)
+
+Instructions
+------------
 
 In addition to Python 3, the following libraries must be installed manually.
 Unfortunately, there is no way to automate this using pip currently. On
