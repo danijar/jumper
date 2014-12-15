@@ -68,8 +68,14 @@ class Player(object):
 			# Fetch components
 			other_body = self.engine.entities.bodies.get(other_entity)
 			other_character = self.engine.entities.characters.get(other_entity)
+			other_animation = self.engine.entities.animations.get(other_entity)
 			if not other_body or not other_character:
 				continue
-			# Check if other player near enough and cool down has finished
+			# Check if other player near enough
+			if (vec(other_body) - vec(body)).length() > character.attack_range:
+				continue
+			# Try to attack, succeeds if cool down has finished
 			if character.attack(other_character):
 				other_body.bounce_from(body)
+				if other_animation:
+					other_animation.play('asset/animation/player-hit.png')

@@ -3,7 +3,7 @@ import pygame, time
 
 class Character(object):
 	def __init__(self):
-		self.speed = 4.0
+		self.speed = 3.0
 		self.health = 3
 		self.attack_time = 1.0
 		self.attack_range = 55.0
