@@ -9,7 +9,14 @@ class Player(object):
 
 	def update(self):
 		"""Update all sub systems"""
+		self.update_second_jumps()
 		self.update_inputs()
+
+	def update_second_jumps(self):
+		for entity, player in self.engine.entities.players.items():
+			body = self.engine.entities.bodies.get(entity)
+			if body and body.standing:
+				player.second_jump = True
 		
 	def update_inputs(self):
 		"""Handle movement from user input"""
@@ -26,31 +33,35 @@ class Player(object):
 			if character.freezed():
 				continue
 			# Move body by user input
-			left, right, jump = False, False, False
+			left, right = False, False
 			if keys[player.controls['right']]:
 				body.velocity.x = character.speed
 				right = True
 			if keys[player.controls['left']]:
 				body.velocity.x = -character.speed
 				left = True
-			if keys[player.controls['jump']]:
-				if body.standing:
-					body.velocity.y = -2.5 * character.speed
-					jump = True
 			# Update animations
 			if animated:
 				if left:
 					animated.play('asset/animation/player-left.png', restart=False, repeat=True)
 				elif right:
 					animated.play('asset/animation/player-right.png', restart=False, repeat=True)
-				elif jump:
-					pass
 				elif body.standing:
 					animated.stop()
 
 	def keydown(self, key):
 		"""Event handler for key down events"""
 		for entity, player in self.engine.entities.players.items():
+			# Get properties
+			body = self.engine.entities.bodies.get(entity)
+			character = self.engine.entities.characters.get(entity)
+			# Handle keys
+			if key == player.controls['jump'] and body and character:
+				if body.standing:
+					body.velocity.y = -2.5 * character.speed
+				elif player.second_jump:
+					player.second_jump = False
+					body.velocity.y = -1.8 * character.speed
 			if key == player.controls['attack']:
 				self.attack(entity)
 

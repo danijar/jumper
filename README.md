@@ -3,7 +3,7 @@ Jumper
 
 A jump and run game with puzzle solving elements written in Python.
 
-![Screenshot](screenshot/2014-12-13.png?raw=true)
+![Screenshot](screenshot/2014-12-15.png?raw=true)
 
 Instructions
 ------------
@@ -38,14 +38,15 @@ Windows, use the `application.bat` script.
 Controls
 --------
 
-Key     | Function
-------- | ----------
-`A`     | Move left
-`D`     | Move right
-`Space` | Jump
+Function            | Player 1 | Player 2 |
+------------------- |:--------:|:--------:|
+Move left           | A        | Left     |
+Move right          | D        | Right    |
+Jump                | W        | Up       |
+Attack other player | Space    | Return   |
 
-You can only jump when you are on the ground. However, you can move sideways
-while you are in the air.
+While you are in the air, you have a second jump and you can move sideways. Hit
+enemies by jumping ontop of them.
 
 Attribution
 -----------

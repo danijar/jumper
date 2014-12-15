@@ -12,3 +12,4 @@ class Player(object):
 			'jump':   pygame.K_w,
 			'attack': pygame.K_SPACE
 		}
+		self.second_jump = True
