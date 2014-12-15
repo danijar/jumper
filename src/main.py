@@ -6,6 +6,7 @@ from system.player import Player
 from system.movement import Movement
 from system.body import Body
 from system.text import Text
+from system.animation import Animation
 from system.sprite import Sprite
 from system.level import Level
 from component.text import Text as TextComponent
@@ -18,8 +19,9 @@ windows    = Window(engine)
 characters = Character(engine)
 players    = Player(engine)
 movements  = Movement(engine)
-bodies      = Body(engine)
+bodies     = Body(engine)
 texts      = Text(engine)
+animation  = Animation(engine)
 sprites    = Sprite(engine)
 level      = Level(engine)
 
@@ -40,6 +42,7 @@ while engine.running:
 	players.update()
 	movements.update()
 	bodies.update()
+	animation.update()
 	sprites.update()
 	texts.update()
 	level.update()

@@ -10,6 +10,7 @@ class Entities(object):
 		self.players = {}
 		self.texts = {}
 		self.rails = {}
+		self.animations = {}
 
 	def create(self):
 		return uuid.uuid4()
@@ -22,6 +23,7 @@ class Entities(object):
 		self.players.pop(entity, None)
 		self.texts.pop(entity, None)
 		self.rails.pop(entity, None)
+		self.animations.pop(entity, None)
 
 
 class Events(object):

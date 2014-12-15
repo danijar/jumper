@@ -7,6 +7,7 @@ from component.player import Player
 from component.movement import Movement
 from component.rail import Rail
 from component.text import Text
+from component.animation import Animation
 from vec import vec
 
 
@@ -115,6 +116,11 @@ class Level(object):
 						self.scale(entity, vec(grid / 1.5, grid))
 						self.move(entity, vec(grid / 1.5, 0))
 						self.add_player(1, entity)
+						# Add animation
+						animation = Animation()
+						animation.load("asset/animation/player-idle.png", 3)
+						animation.play()
+						self.engine.entities.animations[entity] = animation
 					# Second player
 					elif symbol == '2':
 						entity = self.create_body("asset/texture/player-2.png", position)
