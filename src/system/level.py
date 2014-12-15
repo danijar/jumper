@@ -118,8 +118,7 @@ class Level(object):
 						self.add_player(1, entity)
 						# Add animation
 						animation = Animation()
-						animation.load("asset/animation/player-idle.png", 3)
-						animation.play()
+						animation.play('asset/animation/player-idle.png')
 						self.engine.entities.animations[entity] = animation
 					# Second player
 					elif symbol == '2':

@@ -50,6 +50,7 @@ class Character(object):
 			for player in self.engine.entities.players:
 				player_body = self.engine.entities.bodies.get(player)
 				player_character = self.engine.entities.characters.get(player)
+				player_animation = self.engine.entities.animations.get(player)
 				if not player_body or not player_character:
 					continue
 				# Check if overlapping with player upper part of body,
@@ -57,3 +58,5 @@ class Character(object):
 				if player_body.collide_upper(enemy_body):
 					if enemy_character.attack(player_character):
 						player_body.bounce_from(enemy_body)
+						player_animation.play('asset/animation/player-hit.png',
+								repeat=False, next='asset/animation/player-idle.png')
