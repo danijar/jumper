@@ -23,6 +23,7 @@ class Character(object):
 	def update_hits(self):
 		"""Hit enemies when objects fall on them"""
 		for entity, character in self.engine.entities.characters.copy().items():
+			animated = self.engine.entities.animations.get(entity)
 			# Skip players to allow them move objects on their head
 			if entity in self.engine.entities.players:
 				continue
@@ -34,6 +35,8 @@ class Character(object):
 			for other in body.ontops.copy():
 				character.hit()
 				other.bounce_from(body)
+				if animated:
+					animated.play('asset/animation/enemy-hit.png')
 
 	def update_attacks(self):
 		"""Attack players when they walk into enemies"""
@@ -58,5 +61,5 @@ class Character(object):
 				if player_body.collide_upper(enemy_body):
 					if enemy_character.attack(player_character):
 						player_body.bounce_from(enemy_body)
-						player_animation.play('asset/animation/player-hit.png',
-								repeat=False, next='asset/animation/player-idle.png')
+						if player_animation:
+							player_animation.play('asset/animation/player-hit.png')

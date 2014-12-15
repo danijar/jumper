@@ -12,6 +12,7 @@ class Movement(object):
 		self.update_obstacles()
 		self.update_gaps()
 		self.update_apply()
+		self.update_animations()
 
 	def update_levels(self):
 		"""Change directions at level bounds"""
@@ -91,3 +92,17 @@ class Movement(object):
 			# Apply movement
 			sign = [-1, 1][movement.direction]
 			body.velocity.x = sign * character.speed
+
+	def update_animations(self):
+		for entity, movement in self.engine.entities.movements.items():
+			animated = self.engine.entities.animations.get(entity)
+			if not animated:
+				continue
+			# Only update animation when this doesn't override other
+			# animations that are likely to be more important than walking
+			walking = animated.is_playing(endswith='left.png') or animated.is_playing(endswith='right.png')
+			if not animated.running or walking:
+				if movement.direction:
+					animated.play('asset/animation/enemy-right.png', restart=False, repeat=True)
+				else:
+					animated.play('asset/animation/enemy-left.png', restart=False, repeat=True)

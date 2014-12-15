@@ -18,6 +18,7 @@ class Player(object):
 			# Fetch components
 			body = self.engine.entities.bodies.get(entity)
 			character = self.engine.entities.characters.get(entity)
+			animated = self.engine.entities.animations.get(entity)
 			if not body or not character:
 				continue
 			# Prevent player from being hit right again by disabling user
@@ -25,13 +26,27 @@ class Player(object):
 			if character.freezed():
 				continue
 			# Move body by user input
+			left, right, jump = False, False, False
 			if keys[player.controls['right']]:
 				body.velocity.x = character.speed
+				right = True
 			if keys[player.controls['left']]:
 				body.velocity.x = -character.speed
+				left = True
 			if keys[player.controls['jump']]:
 				if body.standing:
 					body.velocity.y = -2.5 * character.speed
+					jump = True
+			# Update animations
+			if animated:
+				if left:
+					animated.play('asset/animation/player-left.png', restart=False, repeat=True)
+				elif right:
+					animated.play('asset/animation/player-right.png', restart=False, repeat=True)
+				elif jump:
+					pass
+				elif body.standing:
+					animated.stop()
 
 	def keydown(self, key):
 		"""Event handler for key down events"""

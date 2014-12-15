@@ -46,3 +46,10 @@ Key     | Function
 
 You can only jump when you are on the ground. However, you can move sideways
 while you are in the air.
+
+Attribution
+-----------
+
+This game uses modified assets from [Sithjester's RMXP Resources][3].
+
+[3]: http://untamed.wild-refuge.net/rmxpresources.php?characters

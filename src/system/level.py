@@ -7,7 +7,7 @@ from component.player import Player
 from component.movement import Movement
 from component.rail import Rail
 from component.text import Text
-from component.animation import Animation
+from component.animation import Animated
 from vec import vec
 
 
@@ -34,6 +34,12 @@ class Level(object):
 		body.h = sprite.get_rect().h
 		body.w = sprite.get_rect().w
 
+	def scale_height(self, entity, height):
+		sprite = self.engine.entities.sprites[entity]
+		size = vec(sprite.get_width(), sprite.get_height())
+		size *= height / sprite.get_height()
+		self.scale(entity, size)
+
 	def move(self, entity, offset):
 		body = self.engine.entities.bodies[entity]
 		body.real += offset
@@ -58,6 +64,8 @@ class Level(object):
 		self.engine.entities.characters[entity] = character
 		# Attach movement behavior
 		self.engine.entities.movements[entity] = Movement()
+		# Animations
+		self.engine.entities.animations[entity] = Animated()
 		return entity
 
 	def add_player(self, number=1, entity=None, controls=None):
@@ -85,6 +93,8 @@ class Level(object):
 		# Attach text component for health and ammo display
 		evaluate = lambda: 'Player {0} has {1} lifes left.'.format(number, character.health)
 		self.engine.entities.texts[entity] = Text(evaluate)
+		# Animations
+		self.engine.entities.animations[entity] = Animated()
 		return entity
 	
 	def load(self, path):
@@ -113,18 +123,12 @@ class Level(object):
 					# First player
 					elif symbol == '1':
 						entity = self.create_body("asset/texture/player.png", position)
-						self.scale(entity, vec(grid / 1.5, grid))
-						self.move(entity, vec(grid / 1.5, 0))
+						self.scale_height(entity, grid)
 						self.add_player(1, entity)
-						# Add animation
-						animation = Animation()
-						animation.play('asset/animation/player-idle.png')
-						self.engine.entities.animations[entity] = animation
 					# Second player
 					elif symbol == '2':
-						entity = self.create_body("asset/texture/player-2.png", position)
-						self.scale(entity, vec(grid / 1.5, grid))
-						self.move(entity, vec(grid / 1.5, 0))
+						entity = self.create_body("asset/texture/player.png", position)
+						self.scale_height(entity, grid)
 						self.add_player(2, entity, {
 							'up': pygame.K_UP,
 							'left': pygame.K_LEFT,
@@ -146,11 +150,11 @@ class Level(object):
 						rail.left = position.x
 						self.engine.entities.rails[entity] = rail
 					# Randomly fill with boxes
-					elif random.random() < 0.05:
+					elif random.random() < 0.02:
 						entity = self.create_body("asset/texture/box.png", position, 25.0)
 						self.scale(entity, 35)
 					# Randomly fill with rocks
-					elif random.random() < 0.05:
+					elif random.random() < 0.02:
 						length = int(30 + (20 * random.random()))
 						entity = self.create_body("asset/texture/rock.png", position, length * length)
 						self.scale(entity, length)
