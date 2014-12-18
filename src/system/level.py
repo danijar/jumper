@@ -6,7 +6,7 @@ from component.character import Character
 from component.player import Player
 from component.movement import Movement
 from component.rail import Rail
-from component.text import Text
+from component.interface import InterfaceHealth
 from component.animation import Animated
 from vec import vec
 
@@ -30,9 +30,10 @@ class Level(object):
 		sprite = self.engine.entities.sprites[entity]
 		sprite = pygame.transform.scale(sprite, size.list())
 		self.engine.entities.sprites[entity] = sprite
-		body = self.engine.entities.bodies[entity]
-		body.h = sprite.get_rect().h
-		body.w = sprite.get_rect().w
+		body = self.engine.entities.bodies.get(entity)
+		if body:
+			body.h = sprite.get_rect().h
+			body.w = sprite.get_rect().w
 
 	def scale_height(self, entity, height):
 		sprite = self.engine.entities.sprites[entity]
@@ -90,13 +91,17 @@ class Level(object):
 		if controls:
 			player.controls = controls
 		self.engine.entities.players[entity] = player
-		# Attach text component for health and ammo display
-		evaluate = lambda: 'Player {0} has {1} lifes left.'.format(number, character.health)
-		self.engine.entities.texts[entity] = Text(evaluate)
+		# Attach text component for health display
+		kwargs = {}
+		if number == 1:
+			kwargs = {'top': 5, 'left': 5}
+		elif number == 2:
+			kwargs = {'top': 5, 'right': self.engine.width-5}
+		self.engine.entities.interfaces[entity] = InterfaceHealth(character, **kwargs)
 		# Animations
 		self.engine.entities.animations[entity] = Animated()
 		return entity
-	
+
 	def load(self, path):
 		grid = 48
 		rail = None
