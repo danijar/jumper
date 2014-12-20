@@ -7,7 +7,7 @@ from component.player import Player
 from component.movement import Movement
 from component.rail import Rail
 from component.interface import InterfaceHealth
-from component.animation import Animated
+from component.animation import Animated, Animation
 from vec import vec
 
 
@@ -24,6 +24,11 @@ class Level(object):
 		body.mass = mass
 		self.engine.entities.bodies[entity] = body
 		return entity
+
+	def position(self, entity, position):
+		body = self.engine.entities.bodies.get(entity)
+		if body:
+			body.set(position)
 
 	def scale(self, entity, size):
 		size = vec(size)
@@ -46,15 +51,13 @@ class Level(object):
 		body.real += offset
 		body.reinitialize()
 
-	def add_enemy(self, entity):
-		if entity is None:
-			entity = self.engine.entities.create()
+	def create_enemy_solider(self, entity):
+		entity = self.engine.entities.create()
 		# Load default sprite
-		if entity not in self.engine.entities.sprites:
-			self.engine.entities.sprites[entity] = pygame.image.load("asset/texture/enemy.png")
+		sprite = pygame.image.load("asset/texture/enemy-solider.png")
+		self.engine.entities.sprites[entity] = sprite
 		# Attach body and tweak parameters
-		if entity not in self.engine.entities.bodies:
-			self.engine.entities.bodies[entity] = Body(self.engine.entities.sprites[entity].get_rect())
+		self.engine.entities.bodies[entity] = Body(sprite.get_rect())
 		body = self.engine.entities.bodies[entity]
 		body.mass = 70.0
 		body.friction.x = 10.0
@@ -66,18 +69,47 @@ class Level(object):
 		# Attach movement behavior
 		self.engine.entities.movements[entity] = Movement()
 		# Animations
-		self.engine.entities.animations[entity] = Animated()
+		animations = {
+			'left': Animation('asset/animation/enemy-solider-left.png', 4, 0.5),
+			'right': Animation('asset/animation/enemy-solider-right.png', 4, 0.5),
+			'hit': Animation('asset/animation/enemy-solider-hit.png', 3, 1.0)
+		}
+		self.engine.entities.animations[entity] = Animated(animations)
 		return entity
 
-	def add_player(self, number=1, entity=None, controls=None):
-		if entity is None:
-			entity = self.engine.entities.create()
+	def create_enemy_bat(self, entity):
+		entity = self.engine.entities.create()
 		# Load default sprite
-		if entity not in self.engine.entities.sprites:
-			self.engine.entities.sprites[entity] = pygame.image.load("asset/texture/player.png")
+		sprite = pygame.image.load("asset/texture/enemy-bat.png")
+		self.engine.entities.sprites[entity] = sprite
 		# Attach body and tweak parameters
-		if entity not in self.engine.entities.bodies:
-			self.engine.entities.bodies[entity] = Body(self.engine.entities.sprites[entity].get_rect())
+		self.engine.entities.bodies[entity] = Body(sprite.get_rect())
+		body = self.engine.entities.bodies[entity]
+		body.mass = 20.0
+		body.friction.x = 10.0
+		# Attach default character component
+		character = Character()
+		character.speed = 2.0
+		character.health = 1
+		self.engine.entities.characters[entity] = character
+		# Attach movement behavior
+		self.engine.entities.movements[entity] = Movement()
+		# Animations
+		animations = {
+			'left': Animation('asset/animation/enemy-bat-left.png', 4, 0.5),
+			'right': Animation('asset/animation/enemy-bat-right.png', 4, 0.5),
+			'hit': Animation('asset/animation/enemy-bat-hit.png', 3, 1.0)
+		}
+		self.engine.entities.animations[entity] = Animated(animations)
+		return entity
+
+	def create_player(self, number=1, controls=None):
+		entity = self.engine.entities.create()
+		# Load default sprite
+		sprite = pygame.image.load("asset/texture/player.png")
+		self.engine.entities.sprites[entity] = sprite
+		# Attach body and tweak parameters
+		self.engine.entities.bodies[entity] = Body(sprite.get_rect())
 		body = self.engine.entities.bodies[entity]
 		body.mass = 70.0
 		body.friction.x = 10.0
@@ -99,7 +131,12 @@ class Level(object):
 			kwargs = {'top': 5, 'right': self.engine.width-5}
 		self.engine.entities.interfaces[entity] = InterfaceHealth(character, **kwargs)
 		# Animations
-		self.engine.entities.animations[entity] = Animated()
+		animations = {
+			'left': Animation('asset/animation/player-left.png', 4, 0.5),
+			'right': Animation('asset/animation/player-right.png', 4, 0.5),
+			'hit': Animation('asset/animation/player-hit.png', 3, 1.0)
+		}
+		self.engine.entities.animations[entity] = Animated(animations)
 		return entity
 
 	def load(self, path):
@@ -127,14 +164,12 @@ class Level(object):
 							rail.platforms.append(entity)
 					# First player
 					elif symbol == '1':
-						entity = self.create_body("asset/texture/player.png", position)
+						entity = self.create_player(1)
 						self.scale_height(entity, grid)
-						self.add_player(1, entity)
+						self.position(entity, position + vec(grid / 1.5, 0))
 					# Second player
 					elif symbol == '2':
-						entity = self.create_body("asset/texture/player.png", position)
-						self.scale_height(entity, grid)
-						self.add_player(2, entity, {
+						entity = self.create_player(2, {
 							'up': pygame.K_UP,
 							'left': pygame.K_LEFT,
 							'down': pygame.K_DOWN,
@@ -142,12 +177,18 @@ class Level(object):
 							'jump': pygame.K_UP,
 							'attack': pygame.K_RETURN
 						})
-					# Add enemy
+						self.scale_height(entity, grid)
+						self.position(entity, position + vec(grid / 1.5, 0))
+					# Add solider enemy
 					elif symbol == 'A':
-						entity = self.create_body("asset/texture/enemy.png", position)
+						entity = self.create_enemy_solider(entity)
 						self.scale(entity, vec(grid / 1.5, grid))
-						self.move(entity, vec(grid / 1.5, 0))
-						self.add_enemy(entity)
+						self.position(entity, position + vec(grid / 1.5, 0))
+					# Add bat enemy
+					elif symbol == 'B':
+						entity = self.create_enemy_bat(entity)
+						self.scale(entity, vec(grid / 1.5, grid))
+						self.position(entity, position + vec(grid / 1.5, 0))
 					# Rail for moving platform
 					elif symbol == '-' and rail is None:
 						entity = self.engine.entities.create()

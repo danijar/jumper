@@ -100,9 +100,9 @@ class Movement(object):
 				continue
 			# Only update animation when this doesn't override other
 			# animations that are likely to be more important than walking
-			walking = animated.is_playing(endswith='left.png') or animated.is_playing(endswith='right.png')
+			walking = animated.is_playing('left') or animated.is_playing('right')
 			if not animated.running or walking:
 				if movement.direction:
-					animated.play('asset/animation/enemy-right.png', restart=False, repeat=True)
+					animated.play('right', restart=False, repeat=True)
 				else:
-					animated.play('asset/animation/enemy-left.png', restart=False, repeat=True)
+					animated.play('left', restart=False, repeat=True)

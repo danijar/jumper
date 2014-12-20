@@ -1,4 +1,4 @@
-import pygame, time
+import pygame, time, copy
 from vec import vec
 
 
@@ -16,9 +16,14 @@ class Character(object):
 		"""Remove dead characters"""
 		for entity, character in self.engine.entities.characters.copy().items():
 			if character.health < 1:
-				# Detach from physics simulation and remove entity
-				self.engine.entities.bodies[entity].detach()
-				self.engine.entities.remove(entity)
+				animated = self.engine.entities.animations.get(entity)
+				if animated and 'hit' in animated.animations:
+					# Wait for hit animation
+					current_entity = copy.deepcopy(entity)
+					remove = lambda: self.remove_character(current_entity)
+					animated.play('hit', restart=False, next=remove)
+				else:
+					self.remove_character(entity)
 
 	def update_hits(self):
 		"""Hit enemies when objects fall on them"""
@@ -36,7 +41,7 @@ class Character(object):
 				character.hit()
 				other.bounce_from(body)
 				if animated:
-					animated.play('asset/animation/enemy-hit.png')
+					animated.play('hit')
 
 	def update_attacks(self):
 		"""Attack players when they walk into enemies"""
@@ -62,4 +67,9 @@ class Character(object):
 					if enemy_character.attack(player_character):
 						player_body.bounce_from(enemy_body)
 						if player_animation:
-							player_animation.play('asset/animation/player-hit.png')
+							player_animation.play('hit')
+
+	def remove_character(self, entity):
+		"""Detach from physics simulation and remove entity"""
+		self.engine.entities.remove(entity)
+		self.engine.entities.remove(entity)

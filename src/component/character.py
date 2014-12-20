@@ -8,7 +8,7 @@ class Character(object):
 		self.attack_time = 1.0
 		self.attack_range = 55.0
 		self.last_attack = None
-		self.hit_time = 1.0
+		self.hit_time = 1.2
 		self.last_hit = None
 
 	def attack(self, target, amount=1):

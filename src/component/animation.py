@@ -2,8 +2,6 @@ import pygame, time
 
 
 class Animation(object):
-	animations = {}
-
 	def __init__(self, path, frames, duration=1.0):
 		self.path = path
 		self.image = pygame.image.load(self.path)
@@ -11,47 +9,45 @@ class Animation(object):
 		self.speed = duration / self.frames
 		self.width = self.image.get_width() / frames
 		self.height = self.image.get_height()
-	
-	def cache(self):
-		"""Add instance to the global collection"""
-		Animation.animations[self.path] = self
 
 
 class Animated(object):
-	def __init__(self):
-		self.animation = None
-		self.current = 0
+	def __init__(self, animations):
+		"""Pass a dict from names to Animation objects that this component is
+		capable of"""
+		self.animations = animations
+		self.current_name = None
+		self.current_animation = None
+		self.current_frame = 0
 		self.repeat = False
 		self.switched = None
 		self.next = None
 		self.running = False
 
-	def play(self, path, repeat=False, restart=True, next=None):
-		if path not in Animation.animations:
-			raise 'Please create and cache the animation before using it'
-		if not restart:
-			if self.is_playing(path):
-				return
-		self.animation = Animation.animations[path]
+	def play(self, name, repeat=False, restart=True, next=None):
+		if name not in self.animations:
+			raise 'The component does not know this animation'
 		self.repeat = repeat
-		self.current = 0
-		self.switched = time.clock()
 		self.next = next
+		if not restart:
+			if self.is_playing(name):
+				return
+		self.current_name = name
+		self.current_animation = self.animations[name]
+		self.current_frame = 0
+		self.switched = time.clock()
 		self.running = True
 
 	def stop(self):
 		self.running = False
 
-	def is_playing(self, path=None, endswith=None):
-		if not self.running:
-			return False
-		elif path:
-			return self.animation.path == path
-		elif endswith:
-			return self.animation.path.endswith(endswith)
+	def is_playing(self, name=None):
+		if self.running and name:
+			return self.current_name == name
+		return False
 
 	def get_frame(self):
-		offset = self.current * self.animation.width
-		clipping = pygame.Rect(offset, 0, self.animation.width, self.animation.height)
-		image = self.animation.image.subsurface(clipping)
+		offset = self.current_frame * self.current_animation.width
+		clipping = pygame.Rect(offset, 0, self.current_animation.width, self.current_animation.height)
+		image = self.current_animation.image.subsurface(clipping)
 		return image

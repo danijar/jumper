@@ -43,9 +43,9 @@ class Player(object):
 			# Update animations
 			if animated:
 				if left:
-					animated.play('asset/animation/player-left.png', restart=False, repeat=True)
+					animated.play('left', restart=False, repeat=True)
 				elif right:
-					animated.play('asset/animation/player-right.png', restart=False, repeat=True)
+					animated.play('right', restart=False, repeat=True)
 				elif body.standing:
 					animated.stop()
 
@@ -89,4 +89,4 @@ class Player(object):
 			if character.attack(other_character):
 				other_body.bounce_from(body)
 				if other_animation:
-					other_animation.play('asset/animation/player-hit.png')
+					other_animation.play('hit')
