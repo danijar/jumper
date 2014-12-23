@@ -14,18 +14,19 @@ class Animation(object):
 				if not animated.running:
 					continue
 				if animated.switched + animated.current_animation.speed < time.clock():
-					animated.switched = time.clock()
-					if animated.current_frame < animated.current_animation.frames - 1:
-						# Go to next frame
-						animated.current_frame += 1
-					else:
-						# Reached end of sprite animation
-						self.finish(animated)
+					self.next_frame(animated)
+
+	def next_frame(self, animated):
+		animated.switched = time.clock()
+		# Go to next frame
+		if animated.current_frame < animated.current_animation.frames - 1:
+			animated.current_frame += 1
+		# Reached end of sprite animation
+		else:
+			self.finish(animated)
 
 	def finish(self, animated):
 		if animated.repeat:
 			animated.current_frame = 0
 		else:
-			animated.running = False
-			if animated.next:
-				animated.next()
+			animated.stop()

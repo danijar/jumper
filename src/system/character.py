@@ -17,8 +17,8 @@ class Character(object):
 		for entity, character in self.engine.entities.characters.copy().items():
 			if character.health < 1:
 				animated = self.engine.entities.animations.get(entity)
-				if animated and 'hit' in animated.animations:
-					# Wait for hit animation
+				if animated and animated.is_playing('hit'):
+					# Add callback to animation that removes the entity
 					current_entity = copy.deepcopy(entity)
 					remove = lambda: self.remove_character(current_entity)
 					animated.play('hit', restart=False, next=remove)
@@ -38,10 +38,10 @@ class Character(object):
 				continue
 			# Hit enemy for each object on top
 			for other in body.ontops.copy():
-				character.hit()
-				other.bounce_from(body)
-				if animated:
-					animated.play('hit')
+				if character.hit():
+					other.bounce_from(body)
+					if animated:
+						animated.play('hit', restart=False)
 
 	def update_attacks(self):
 		"""Attack players when they walk into enemies"""
@@ -71,5 +71,5 @@ class Character(object):
 
 	def remove_character(self, entity):
 		"""Detach from physics simulation and remove entity"""
-		self.engine.entities.remove(entity)
+		self.engine.entities.bodies[entity].detach()
 		self.engine.entities.remove(entity)

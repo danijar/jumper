@@ -116,6 +116,7 @@ class Level(object):
 		body.restitution = 0.0
 		# Attach default character component
 		character = Character()
+		character.health = 5
 		self.engine.entities.characters[entity] = character
 		# Attach player component and override provided controls
 		player = Player()

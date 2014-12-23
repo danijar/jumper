@@ -30,7 +30,7 @@ class InterfaceHealth(Interface):
 		self.right = right
 
 	def evaluate(self):
-		health = 1# self.character.health if self.character else 0
+		health = self.character.health if self.character else 0
 		rect = InterfaceHealth.heart.get_rect()
 		sprite = pygame.Surface((rect.w * health, rect.h), flags=pygame.SRCALPHA)
 		sprite.fill((0, 0, 0, 0))

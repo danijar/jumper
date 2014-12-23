@@ -32,6 +32,8 @@ class Animated(object):
 		if not restart:
 			if self.is_playing(name):
 				return
+		if self.running and self.next:
+			self.next()
 		self.current_name = name
 		self.current_animation = self.animations[name]
 		self.current_frame = 0
@@ -39,6 +41,8 @@ class Animated(object):
 		self.running = True
 
 	def stop(self):
+		if self.next:
+			self.next()
 		self.running = False
 
 	def is_playing(self, name=None):
